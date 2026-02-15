@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Box,
@@ -46,19 +46,19 @@ const ZoroastrianEventTable = ({
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   
   // Use user's default calendar preference if authenticated, otherwise default to Shenshai
-  const getInitialCalendarType = () => {
+  const getInitialCalendarType = useCallback(() => {
     if (isAuthenticated && user?.default_zoro_cal) {
       return user.default_zoro_cal;
     }
     return calendarTypes.SHENSHAI;
-  };
+  }, [isAuthenticated, user?.default_zoro_cal]);
   
   const [calendarType, setCalendarType] = useState(getInitialCalendarType());
 
   // Update calendar type when user changes or authentication status changes
   useEffect(() => {
     setCalendarType(getInitialCalendarType());
-  }, [user?.default_zoro_cal, isAuthenticated]);
+  }, [user?.default_zoro_cal, isAuthenticated, getInitialCalendarType]);
 
   // Sort events by Zoroastrian next occurrence (least days remaining first)
   const sortedEvents = sortEventsByZoroastrianOccurrence(

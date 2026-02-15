@@ -34,19 +34,19 @@ const CalendarTab = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   
   // Use user's default calendar preference if authenticated, otherwise default to Shenshai
-  const getInitialCalendarType = () => {
+  const getInitialCalendarType = React.useCallback(() => {
     if (isAuthenticated && user?.default_zoro_cal) {
       return user.default_zoro_cal;
     }
     return 'Shenshai';
-  };
+  }, [isAuthenticated, user?.default_zoro_cal]);
   
   const [calendarType, setCalendarType] = React.useState(getInitialCalendarType);
 
   // Update calendar type when user changes or authentication status changes
   React.useEffect(() => {
     setCalendarType(getInitialCalendarType());
-  }, [user?.default_zoro_cal, isAuthenticated]);
+  }, [user?.default_zoro_cal, isAuthenticated, getInitialCalendarType]);
 
   // Generate month and year options
   const months = [

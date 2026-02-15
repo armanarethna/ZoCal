@@ -10,7 +10,7 @@ const initialState = {
   darkMode: getInitialDarkMode(),
 };
 
-export const themeSlice = createSlice({
+const themeSlice = createSlice({
   name: 'theme',
   initialState,
   reducers: {
@@ -21,12 +21,6 @@ export const themeSlice = createSlice({
     setDarkMode: (state, action) => {
       state.darkMode = action.payload;
       localStorage.setItem('darkMode', JSON.stringify(state.darkMode));
-    },
-    syncThemeWithUser: (state, action) => {
-      // Sync theme with user's display_mode preference when authenticated
-      if (action.payload?.display_mode) {
-        state.darkMode = action.payload.display_mode === 'dark';
-      }
     },
   },
   extraReducers: (builder) => {
@@ -62,6 +56,6 @@ export const themeSlice = createSlice({
   },
 });
 
-export const { toggleTheme, setDarkMode, syncThemeWithUser } = themeSlice.actions;
+export const { toggleTheme, setDarkMode } = themeSlice.actions;
 
 export default themeSlice.reducer;
