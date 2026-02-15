@@ -1,0 +1,86 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Calendar Color Variables */
+:root {
+  --calendar-header-bg-light: #fff9c4;
+  --calendar-header-bg-dark: #4a4419;
+  --calendar-gatha-bg-light: #9370DB;
+  --calendar-gatha-bg-dark: #6A4C93;
+}
+
+/* Calendar specific styles - Light theme */
+:root {
+  --calendar-header-bg: var(--calendar-header-bg-light);
+  --calendar-gatha-bg: var(--calendar-gatha-bg-light);
+}
+
+/* Calendar specific styles - Dark theme */
+[data-theme="dark"] {
+  --calendar-header-bg: var(--calendar-header-bg-dark);
+  --calendar-gatha-bg: var(--calendar-gatha-bg-dark);
+}
+
+.calendar-day-header {
+  background-color: var(--calendar-header-bg) !important;
+}
+
+.calendar-gatha-tile {
+  background-color: var(--calendar-gatha-bg) !important;
+}
+
+.calendar-today-button-dark {
+  color: white !important;
+  border-color: white !important;
+}
