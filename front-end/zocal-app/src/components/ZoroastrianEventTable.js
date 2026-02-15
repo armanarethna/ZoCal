@@ -69,7 +69,7 @@ const ZoroastrianEventTable = ({
   return (
     <Container maxWidth="lg">
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between' }}>
-        <Typography variant="h4" sx={{ color: 'text.primary' }}>Zoroastrian Events</Typography>
+        <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
         
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel>Calendar</InputLabel>

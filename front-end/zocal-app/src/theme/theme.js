@@ -35,12 +35,41 @@ const getTheme = (darkMode) => createTheme({
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h6: {
       fontWeight: 600,
+      '@media (max-width:600px)': {
+        fontSize: '1rem',
+      },
+    },
+    h5: {
+      '@media (max-width:600px)': {
+        fontSize: '1.1rem',
+      },
     },
     body1: {
       fontSize: '0.875rem',
+      '@media (max-width:600px)': {
+        fontSize: '0.75rem',
+      },
     },
     body2: {
       fontSize: '0.75rem',
+      '@media (max-width:600px)': {
+        fontSize: '0.65rem',
+      },
+    },
+    caption: {
+      '@media (max-width:600px)': {
+        fontSize: '0.6rem',
+        lineHeight: 1.1,
+      },
+    },
+  },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
     },
   },
   components: {
@@ -52,6 +81,20 @@ const getTheme = (darkMode) => createTheme({
           boxShadow: darkMode 
             ? '0 1px 3px rgba(255,255,255,0.12)' 
             : '0 1px 3px rgba(0,0,0,0.12)',
+          '@media (max-width:600px)': {
+            minHeight: '48px',
+          },
+        },
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          '@media (max-width:600px)': {
+            minHeight: '48px !important',
+            paddingLeft: '8px',
+            paddingRight: '8px',
+          },
         },
       },
     },
@@ -61,6 +104,12 @@ const getTheme = (darkMode) => createTheme({
           textTransform: 'none',
           fontWeight: 500,
           minWidth: 120,
+          '@media (max-width:600px)': {
+            minWidth: 80,
+            minHeight: 48,
+            fontSize: '0.75rem',
+            padding: '6px 8px',
+          },
         },
       },
     },
@@ -69,6 +118,9 @@ const getTheme = (darkMode) => createTheme({
         root: {
           backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
           borderRadius: 8,
+          '@media (max-width:600px)': {
+            borderRadius: 4,
+          },
         },
       },
     },
@@ -77,6 +129,30 @@ const getTheme = (darkMode) => createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 6,
+          '@media (max-width:600px)': {
+            minWidth: 'auto',
+            padding: '4px 8px',
+            fontSize: '0.75rem',
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          '@media (max-width:600px)': {
+            padding: '4px',
+          },
+        },
+      },
+    },
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          '@media (max-width:600px)': {
+            paddingLeft: '8px',
+            paddingRight: '8px',
+          },
         },
       },
     },

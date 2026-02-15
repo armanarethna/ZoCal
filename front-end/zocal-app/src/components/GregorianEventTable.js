@@ -40,7 +40,7 @@ const GregorianEventTable = ({
   return (
     <Container maxWidth="lg">
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: 'text.primary' }}>Gregorian Events</Typography>
+        <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
       </Box>
       
       {error && (

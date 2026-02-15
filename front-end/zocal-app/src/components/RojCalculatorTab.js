@@ -14,7 +14,11 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
-  Divider
+  Divider,
+  Tabs,
+  Tab,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { Calculate } from '@mui/icons-material';
 import { gregorianToZoroastrian, calendarTypes } from '../utils/zoroastrianCalendar';
@@ -29,6 +33,18 @@ import {
 const RojCalculatorTab = () => {
   const dispatch = useDispatch();
   const { calendarType, selectedDate, beforeSunrise, result, isValidDate } = useSelector(state => state.calendar.rojCalculator);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const handleCalendarTypeTabChange = (event, newValue) => {
+    const calendarTypes = ['Shenshai', 'Kadmi', 'Fasli'];
+    dispatch(setRojCalendarType(calendarTypes[newValue]));
+  };
+
+  const getCalendarTypeTabValue = () => {
+    const calendarTypes = ['Shenshai', 'Kadmi', 'Fasli'];
+    return calendarTypes.indexOf(calendarType);
+  };
 
   // Helper function to validate if a date string represents a valid date
   const validateDate = (dateString) => {
@@ -91,69 +107,113 @@ const RojCalculatorTab = () => {
     if (result.isGatha) {
       return `${result.roj} (Gatha)`;
     } else {
-      return `${result.roj} (Roj), ${result.mah} (Mah)`;
+      if (isMobile) {
+        return (
+          <>
+            {result.roj} (Roj)
+            <br />
+            {result.mah} (Mah)
+          </>
+        );
+      } else {
+        return `${result.roj} (Roj), ${result.mah} (Mah)`;
+      }
     }
   };
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{ 
-        p: 3, 
-        minHeight: 400,
-        backgroundColor: 'grey.100',
-        borderRadius: 3
+      <Card sx={{ 
+        maxWidth: 600, 
+        mx: 'auto',
+        backgroundColor: 'background.paper',
+        boxShadow: 3,
+        borderRadius: 2,
+        border: '1px solid',
+        borderColor: 'divider',
+        mt: 2
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-          <Calculate sx={{ fontSize: 48, color: 'primary.main', mr: 2 }} />
-          <Typography variant="h4">
-            Roj Calculator
+        <CardContent sx={{ p: 2.5, backgroundColor: 'grey.50' }}>
+          <Typography variant="h6" gutterBottom>
+            Gregorian to Zoroastrian
           </Typography>
-        </Box>
-
-        <Card sx={{ 
-          maxWidth: 600, 
-          mx: 'auto',
-          backgroundColor: 'background.paper',
-          boxShadow: 3,
-          borderRadius: 2,
-          border: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <CardContent sx={{ p: 2.5, backgroundColor: 'grey.50' }}>
-            <Typography variant="h6" gutterBottom>
-              Gregorian to Zoroastrian
-            </Typography>
             
             <Box sx={{ mt: 2, mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <FormControl sx={{ flex: 1 }}>
-                  <InputLabel>Calendar Type</InputLabel>
-                  <Select
-                    value={calendarType}
-                    label="Calendar Type"
-                    onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
-                  >
-                    <MenuItem value={calendarTypes.SHENSHAI}>Shenshai</MenuItem>
-                    <MenuItem value={calendarTypes.KADMI}>Kadmi</MenuItem>
-                    <MenuItem value={calendarTypes.FASLI}>Fasli</MenuItem>
-                  </Select>
-                </FormControl>
+              {isMobile ? (
+                <Box>
+                  {/* Mobile Layout - Tabs for Calendar Type */}
+                  <Box sx={{ mb: 2 }}>
+                    <Tabs
+                      value={getCalendarTypeTabValue()}
+                      onChange={handleCalendarTypeTabChange}
+                      variant="fullWidth"
+                      sx={{
+                        minHeight: 36,
+                        '& .MuiTab-root': {
+                          minHeight: 36,
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          py: 0.5,
+                          px: 1,
+                        },
+                        width: '100%',
+                      }}
+                    >
+                      <Tab label="Shenshai" />
+                      <Tab label="Kadmi" />
+                      <Tab label="Fasli" />
+                    </Tabs>
+                  </Box>
+                  
+                  {/* Date Input */}
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Date"
+                    value={selectedDate}
+                    onChange={(e) => dispatch(setRojSelectedDate(e.target.value))}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    inputProps={{
+                      min: minDate,
+                      max: maxDate
+                    }}
+                    sx={{ mb: 2 }}
+                  />
+                </Box>
+              ) : (
+                /* Desktop Layout - Original Dropdown */
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                  <FormControl sx={{ flex: 1 }}>
+                    <InputLabel>Calendar Type</InputLabel>
+                    <Select
+                      value={calendarType}
+                      label="Calendar Type"
+                      onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
+                    >
+                      <MenuItem value={calendarTypes.SHENSHAI}>Shenshai</MenuItem>
+                      <MenuItem value={calendarTypes.KADMI}>Kadmi</MenuItem>
+                      <MenuItem value={calendarTypes.FASLI}>Fasli</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                <TextField
-                  sx={{ flex: 1 }}
-                  type="date"
-                  label="Date"
-                  value={selectedDate}
-                  onChange={(e) => dispatch(setRojSelectedDate(e.target.value))}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  inputProps={{
-                    min: minDate,
-                    max: maxDate
-                  }}
-                />
-              </Box>
+                  <TextField
+                    sx={{ flex: 1 }}
+                    type="date"
+                    label="Date"
+                    value={selectedDate}
+                    onChange={(e) => dispatch(setRojSelectedDate(e.target.value))}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    inputProps={{
+                      min: minDate,
+                      max: maxDate
+                    }}
+                  />
+                </Box>
+              )}
 
               <FormControlLabel
                 control={
@@ -196,9 +256,8 @@ const RojCalculatorTab = () => {
             </Box>
           </CardContent>
         </Card>
-      </Paper>
-    </Container>
-  );
-};
+      </Container>
+    );
+  };
 
 export default RojCalculatorTab;

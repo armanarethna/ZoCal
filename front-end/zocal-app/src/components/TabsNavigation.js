@@ -1,7 +1,9 @@
 import React from 'react';
 import {
   Tabs,
-  Tab
+  Tab,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   CalendarMonth,
@@ -10,6 +12,9 @@ import {
 } from '@mui/icons-material';
 
 const TabsNavigation = ({ tabValue, handleTabChange }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <Tabs
       value={tabValue}
@@ -21,19 +26,22 @@ const TabsNavigation = ({ tabValue, handleTabChange }) => {
         borderTop: 1, 
         borderBottom: 1,
         borderColor: 'divider',
-        backgroundColor: 'background.paper'
+        backgroundColor: 'background.paper',
+        minHeight: isMobile ? 48 : 64
       }}
     >
       <Tab
-        icon={<Calculate />}
-        label="Roj Calculator"
-        iconPosition="start"
+        icon={<Calculate fontSize={isMobile ? "small" : "medium"} />}
+        label={isMobile ? "Roj Calc" : "Roj Calculator"}
+        iconPosition={isMobile ? "top" : "start"}
         sx={{ 
-          minHeight: 64, 
-          fontSize: '1rem',
+          minHeight: isMobile ? 48 : 64, 
+          fontSize: isMobile ? '0.7rem' : '1rem',
           borderRight: 1,
           borderColor: 'divider',
           color: 'primary.main',
+          py: isMobile ? 0.5 : 1,
+          px: isMobile ? 0.5 : 1,
           '&.Mui-selected': {
             backgroundColor: 'primary.main',
             color: 'white',
@@ -46,15 +54,17 @@ const TabsNavigation = ({ tabValue, handleTabChange }) => {
         }}
       />
       <Tab
-        icon={<CalendarMonth />}
+        icon={<CalendarMonth fontSize={isMobile ? "small" : "medium"} />}
         label="Calendar"
-        iconPosition="start"
+        iconPosition={isMobile ? "top" : "start"}
         sx={{ 
-          minHeight: 64, 
-          fontSize: '1rem',
+          minHeight: isMobile ? 48 : 64, 
+          fontSize: isMobile ? '0.7rem' : '1rem',
           borderRight: 1,
           borderColor: 'divider',
           color: 'primary.main',
+          py: isMobile ? 0.5 : 1,
+          px: isMobile ? 0.5 : 1,
           '&.Mui-selected': {
             backgroundColor: 'primary.main',
             color: 'white',
@@ -67,13 +77,15 @@ const TabsNavigation = ({ tabValue, handleTabChange }) => {
         }}
       />
       <Tab
-        icon={<Event />}
+        icon={<Event fontSize={isMobile ? "small" : "medium"} />}
         label="Events"
-        iconPosition="start"
+        iconPosition={isMobile ? "top" : "start"}
         sx={{ 
-          minHeight: 64, 
-          fontSize: '1rem',
+          minHeight: isMobile ? 48 : 64, 
+          fontSize: isMobile ? '0.7rem' : '1rem',
           color: 'primary.main',
+          py: isMobile ? 0.5 : 1,
+          px: isMobile ? 0.5 : 1,
           '&.Mui-selected': {
             backgroundColor: 'primary.main',
             color: 'white',

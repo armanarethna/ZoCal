@@ -7,7 +7,9 @@ import {
   ToggleButtonGroup, 
   Typography,
   Paper,
-  Container
+  Container,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { 
   Add as AddIcon, 
@@ -48,10 +50,14 @@ const EventsTab = () => {
   }, [dispatch, isAuthenticated, user]);
 
   // Handle view type change
-  const handleViewTypeChange = (event, newViewType) => {
-    if (newViewType !== null) {
-      setViewType(newViewType);
-    }
+  const handleViewTypeChange = (event, newValue) => {
+    const viewTypes = ['gregorian', 'zoroastrian'];
+    setViewType(viewTypes[newValue]);
+  };
+
+  const getViewTypeTabValue = () => {
+    const viewTypes = ['gregorian', 'zoroastrian'];
+    return viewTypes.indexOf(viewType);
   };
 
   // Handle opening event modal for adding
@@ -118,22 +124,31 @@ const EventsTab = () => {
       ) : (
         <Box>
           {/* Table Type Toggle */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <ToggleButtonGroup
-              value={viewType}
-              exclusive
+          <Box sx={{ mb: 2 }}>
+            <Tabs
+              value={getViewTypeTabValue()}
               onChange={handleViewTypeChange}
-              aria-label="calendar type"
+              variant="fullWidth"
+              sx={{
+                '& .MuiTab-root': {
+                  fontWeight: 'bold',
+                  py: 1,
+                  px: 2,
+                },
+                width: '100%',
+              }}
             >
-              <ToggleButton value="gregorian" aria-label="gregorian calendar">
-                <GregorianIcon sx={{ mr: 1 }} />
-                Gregorian
-              </ToggleButton>
-              <ToggleButton value="zoroastrian" aria-label="zoroastrian calendar">
-                <ZoroastrianIcon sx={{ mr: 1 }} />
-                Zoroastrian
-              </ToggleButton>
-            </ToggleButtonGroup>
+              <Tab 
+                label="GREGORIAN" 
+                icon={<GregorianIcon />}
+                iconPosition="start"
+              />
+              <Tab 
+                label="ZOROASTRIAN" 
+                icon={<ZoroastrianIcon />}
+                iconPosition="start"
+              />
+            </Tabs>
           </Box>
 
           {/* Render appropriate table based on view type */}
