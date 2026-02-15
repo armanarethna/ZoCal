@@ -23,11 +23,13 @@ import {
   Grid,
   Stack,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Button
 } from '@mui/material';
 import {
   Edit as EditIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  Add as AddIcon
 } from '@mui/icons-material';
 
 // Utils
@@ -47,7 +49,8 @@ const ZoroastrianEventTable = ({
   loading, 
   error, 
   onEditEvent, 
-  onDeleteEvent 
+  onDeleteEvent,
+  onAddEvent
 }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const theme = useTheme();
@@ -76,25 +79,51 @@ const ZoroastrianEventTable = ({
 
   return (
     <Container maxWidth="lg">
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between' }}>
-        <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
-        
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Calendar</InputLabel>
-          <Select
-            value={calendarType}
-            label="Calendar"
-            onChange={(e) => setCalendarType(e.target.value)}
-          >
-            <MenuItem value={calendarTypes.SHENSHAI}>Shenshai</MenuItem>
-            <MenuItem value={calendarTypes.KADMI}>Kadmi</MenuItem>
-            <MenuItem value={calendarTypes.FASLI}>Fasli</MenuItem>
-          </Select>
-        </FormControl>
+      {/* Sticky Header */}
+      <Box sx={{ 
+        position: 'sticky', 
+        top: isMobile ? 144 : 192, 
+        zIndex: 1100, 
+        backgroundColor: 'background.default',
+        py: 2,
+        borderBottom: 1,
+        borderColor: 'divider'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>Calendar</InputLabel>
+              <Select
+                value={calendarType}
+                label="Calendar"
+                onChange={(e) => setCalendarType(e.target.value)}
+              >
+                <MenuItem value={calendarTypes.SHENSHAI}>Shenshai</MenuItem>
+                <MenuItem value={calendarTypes.KADMI}>Kadmi</MenuItem>
+                <MenuItem value={calendarTypes.FASLI}>Fasli</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={onAddEvent}
+              sx={{
+                fontSize: isMobile ? '0.8rem' : '1rem',
+                minWidth: isMobile ? 'auto' : '140px',
+                px: isMobile ? 2 : 3
+              }}
+            >
+              {isMobile ? 'Add' : 'Add Event'}
+            </Button>
+          </Box>
+        </Box>
       </Box>
       
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+      {/* Content with spacing */}
+      <Box sx={{ mt: 2 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
@@ -268,6 +297,7 @@ const ZoroastrianEventTable = ({
           </Table>
         </TableContainer>
       )}
+    </Box>
     </Container>
   );
 };

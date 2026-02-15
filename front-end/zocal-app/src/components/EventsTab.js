@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Box, 
-  Fab, 
+import {
+  Box,
   Typography,
   Paper,
   Container,
   Tabs,
-  Tab
+  Tab,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
-  Add as AddIcon, 
   CalendarToday as GregorianIcon, 
   Event as ZoroastrianIcon,
   EventNote as EventIcon
@@ -28,6 +28,8 @@ const EventsTab = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector(state => state.auth);
   const { events = [], loading: eventsLoading, error: eventsError } = useSelector(state => state.events);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Table view state
   const [viewType, setViewType] = useState('gregorian');
@@ -120,9 +122,20 @@ const EventsTab = () => {
           </Paper>
         </Container>
       ) : (
-        <Box>
-          {/* Table Type Toggle */}
-          <Box sx={{ mb: 2 }}>
+        <Box sx={{ position: 'relative' }}>
+          {/* Table Type Toggle - Sticky */}
+          <Box sx={{ 
+            position: 'sticky',
+            top: isMobile ? 96 : 128,
+            zIndex: 1199,
+            backgroundColor: 'background.default',
+            borderBottom: 1,
+            borderColor: 'divider',
+            margin: 0,
+            padding: 0,
+            width: '100%',
+            boxSizing: 'border-box'
+          }}>
             <Tabs
               value={getViewTypeTabValue()}
               onChange={handleViewTypeChange}
@@ -134,6 +147,9 @@ const EventsTab = () => {
                   px: 2,
                 },
                 width: '100%',
+                backgroundColor: 'background.default',
+                margin: 0,
+                padding: 0
               }}
             >
               <Tab 
@@ -157,6 +173,7 @@ const EventsTab = () => {
               error={eventsError}
               onEditEvent={handleEditEvent}
               onDeleteEvent={handleDeleteClick}
+              onAddEvent={handleAddEvent}
             />
           ) : (
             <ZoroastrianEventTable
@@ -165,25 +182,10 @@ const EventsTab = () => {
               error={eventsError}
               onEditEvent={handleEditEvent}
               onDeleteEvent={handleDeleteClick}
+              onAddEvent={handleAddEvent}
             />
           )}
         </Box>
-      )}
-      
-      {/* Floating Add Button - only show when authenticated */}
-      {isAuthenticated && (
-        <Fab
-          color="primary"
-          aria-label="add event"
-          onClick={handleAddEvent}
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-          }}
-        >
-          <AddIcon />
-        </Fab>
       )}
       
       {/* Event Modal */}

@@ -18,11 +18,13 @@ import {
   Grid,
   Stack,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Button
 } from '@mui/material';
 import {
   Edit as EditIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  Add as AddIcon
 } from '@mui/icons-material';
 
 // Utils
@@ -38,7 +40,8 @@ const GregorianEventTable = ({
   loading, 
   error, 
   onEditEvent, 
-  onDeleteEvent 
+  onDeleteEvent,
+  onAddEvent
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -48,12 +51,37 @@ const GregorianEventTable = ({
 
   return (
     <Container maxWidth="lg">
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
+      {/* Sticky Header */}
+      <Box sx={{ 
+        position: 'sticky', 
+        top: isMobile ? 144 : 192, 
+        zIndex: 1100, 
+        backgroundColor: 'background.default',
+        py: 2,
+        borderBottom: 1,
+        borderColor: 'divider'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onAddEvent}
+            sx={{
+              fontSize: isMobile ? '0.8rem' : '1rem',
+              minWidth: isMobile ? 'auto' : '140px',
+              px: isMobile ? 2 : 3
+            }}
+          >
+            {isMobile ? 'Add' : 'Add Event'}
+          </Button>
+        </Box>
       </Box>
       
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+      {/* Content with spacing */}
+      <Box sx={{ mt: 2 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
@@ -203,6 +231,7 @@ const GregorianEventTable = ({
           </Table>
         </TableContainer>
       )}
+    </Box>
     </Container>
   );
 };
