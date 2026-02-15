@@ -17,7 +17,13 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Card,
+  CardContent,
+  Grid,
+  Stack,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -44,6 +50,8 @@ const ZoroastrianEventTable = ({
   onDeleteEvent 
 }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   // Use user's default calendar preference if authenticated, otherwise default to Shenshai
   const getInitialCalendarType = useCallback(() => {
@@ -101,7 +109,78 @@ const ZoroastrianEventTable = ({
             Add new event to get started
           </Typography>
         </Paper>
+      ) : isMobile ? (
+        // Mobile card layout
+        <Stack spacing={2}>
+          {sortedEvents.map((event) => {
+            const zoroEvent = convertEventToZoroastrian(event, calendarType);
+            const fallsOnText = calculateNextGregorianDate(event, calendarType, formatDisplayDate);
+            const daysRemaining = calculateZoroastrianDaysRemaining(event, calendarType);
+            const daysText = daysRemaining === "Today" ? "Today" : `${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} to go`;
+            return (
+              <Card key={event._id} variant="outlined">
+                <CardContent sx={{ p: 2 }}>
+                  <Grid container spacing={1}>
+                    {/* Column 1: Name, Category, Gregorian Date */}
+                    <Grid item xs={5}>
+                      <Stack spacing={0.5}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {event.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {event.category}
+                        </Typography>
+                        <Typography variant="body2">
+                          {formatDisplayDate(event.eventDate)}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    {/* Column 2: Roj, Mah, Occurs, Days Left */}
+                    <Grid item xs={5}>
+                      <Stack spacing={0.5}>
+                        <Typography variant="body2">
+                          {zoroEvent.roj} (R)
+                        </Typography>
+                        <Typography variant="body2">
+                          {zoroEvent.isGatha ? 'GATHA (M)' : `${zoroEvent.mah} (M)`}
+                        </Typography>
+                        <Typography variant="body2">
+                          Occurs: {fallsOnText}
+                        </Typography>
+                        <Typography variant="body2">
+                          {daysText}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    {/* Column 3: Action Buttons */}
+                    <Grid item xs={2}>
+                      <Stack spacing={0.5} alignItems="center">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => onEditEvent(event)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => onDeleteEvent(event)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Stack>
       ) : (
+        // Desktop table layout
         <TableContainer component={Paper}>
           <Table sx={{ 
             '& .MuiTableCell-root': { 
@@ -118,14 +197,15 @@ const ZoroastrianEventTable = ({
               maxWidth: '48px'
             },
             '& .data-column': {
-              width: '16.66%',
-              maxWidth: '16.66%'
+              width: '14.28%',
+              maxWidth: '14.28%'
             }
           }}>
             <TableHead>
               <TableRow>
                 <TableCell className="data-column">Name</TableCell>
                 <TableCell className="data-column">Category</TableCell>
+                <TableCell className="data-column">Date</TableCell>
                 <TableCell className="data-column">Roj</TableCell>
                 <TableCell className="data-column">Mah</TableCell>
                 <TableCell className="data-column">Falls On</TableCell>
@@ -141,6 +221,7 @@ const ZoroastrianEventTable = ({
                   <TableRow key={event._id}>
                     <TableCell className="data-column">{event.name}</TableCell>
                     <TableCell className="data-column">{event.category}</TableCell>
+                    <TableCell className="data-column">{formatDisplayDate(event.eventDate)}</TableCell>
                     <TableCell className="data-column">
                       {zoroEvent.roj}
                     </TableCell>
