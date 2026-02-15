@@ -19,8 +19,9 @@ import {
   useTheme
 } from '@mui/material';
 import { Close as CloseIcon, Settings as SettingsIcon } from '@mui/icons-material';
-import { updateUserSettings } from '../store/authSlice';
-import { calendarTypes } from '../utils/zoroastrianCalendar';
+import { updateUserSettings } from '../../store/authSlice';
+import { calendarTypes } from '../../utils/zoroastrianCalendar';
+import { DISPLAY_MODES, DEFAULT_ZORO_CAL_OPTIONS, ZOROASTRIAN_CALENDAR_TYPES } from '../../constants';
 
 const SettingsModal = ({ open, onClose }) => {
   const dispatch = useDispatch();
@@ -29,8 +30,8 @@ const SettingsModal = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const [formData, setFormData] = useState({
-    display_mode: 'light',
-    default_zoro_cal: 'Shenshai'
+    display_mode: DISPLAY_MODES.LIGHT,
+    default_zoro_cal: DEFAULT_ZORO_CAL_OPTIONS.SHENSHAI
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -40,8 +41,8 @@ const SettingsModal = ({ open, onClose }) => {
   useEffect(() => {
     if (user && open) {
       const initialData = {
-        display_mode: user.display_mode || 'light',
-        default_zoro_cal: user.default_zoro_cal || 'Shenshai'
+        display_mode: user.display_mode || DISPLAY_MODES.LIGHT,
+        default_zoro_cal: user.default_zoro_cal || DEFAULT_ZORO_CAL_OPTIONS.SHENSHAI
       };
       setFormData(initialData);
       setHasChanges(false);
@@ -53,8 +54,8 @@ const SettingsModal = ({ open, onClose }) => {
   useEffect(() => {
     if (user) {
       const changed = 
-        formData.display_mode !== (user.display_mode || 'light') ||
-        formData.default_zoro_cal !== (user.default_zoro_cal || 'Shenshai');
+        formData.display_mode !== (user.display_mode || DISPLAY_MODES.LIGHT) ||
+        formData.default_zoro_cal !== (user.default_zoro_cal || DEFAULT_ZORO_CAL_OPTIONS.SHENSHAI);
       setHasChanges(changed);
     }
   }, [formData, user]);
@@ -160,9 +161,9 @@ const SettingsModal = ({ open, onClose }) => {
               disabled={authLoading || saving}
               sx={{ width: '100%' }}
             >
-              <MenuItem value={calendarTypes.SHENSHAI}>Shenshai</MenuItem>
-              <MenuItem value={calendarTypes.KADMI}>Kadmi</MenuItem>
-              <MenuItem value={calendarTypes.FASLI}>Fasli</MenuItem>
+              {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
+                <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>

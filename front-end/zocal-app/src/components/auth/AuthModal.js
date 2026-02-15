@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Box,
-  Paper,
-  Typography,
-  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
   Button,
   Link,
   CircularProgress,
-  Alert
+  Alert,
+  Box,
+  IconButton
 } from '@mui/material';
-import { loginUser, registerUser, clearError } from '../store/authSlice';
+import { Close as CloseIcon } from '@mui/icons-material';
+import { loginUser, registerUser, clearError } from '../../store/authSlice';
 
-const AuthForms = () => {
+const AuthModal = ({ open, onClose }) => {
   const dispatch = useDispatch();
   const { loading: authLoading, error: authError } = useSelector(state => state.auth);
 
@@ -103,25 +106,59 @@ const AuthForms = () => {
           password: authFormData.password
         })).unwrap();
       }
+      // Close modal and reset form on success
+      onClose();
+      setAuthFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      });
+      setAuthFormErrors({});
+      setIsSignUp(false);
     } catch (error) {
       // Error handled by Redux
     }
   };
 
+  const handleClose = () => {
+    onClose();
+    setAuthFormData({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setAuthFormErrors({});
+    setIsSignUp(false);
+    dispatch(clearError());
+  };
+
   return (
-    <Container maxWidth="sm">
-      <Paper sx={{ p: 4, mt: 2 }}>
-        <Typography variant="h5" gutterBottom align="center">
-          {isSignUp ? 'Sign Up' : 'Log In'}
-        </Typography>
-        
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: { p: 1 }
+      }}
+    >
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+        {isSignUp ? 'Sign Up' : 'Log In'}
+        <IconButton onClick={handleClose}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      
+      <DialogContent>
         {authError && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {authError}
           </Alert>
         )}
         
-        <form onSubmit={handleAuthSubmit}>
+        <Box component="form" onSubmit={handleAuthSubmit} sx={{ mt: 1 }}>
           {isSignUp && (
             <TextField
               fullWidth
@@ -176,33 +213,35 @@ const AuthForms = () => {
               required
             />
           )}
-          
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={authLoading}
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ flexDirection: 'column', gap: 1, p: 3, pt: 1 }}>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          onClick={handleAuthSubmit}
+          disabled={authLoading}
+        >
+          {authLoading ? <CircularProgress size={24} /> : (isSignUp ? 'Sign Up' : 'Log In')}
+        </Button>
+        
+        <Box textAlign="center">
+          <Link
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleAuthMode();
+            }}
+            sx={{ cursor: 'pointer' }}
           >
-            {authLoading ? <CircularProgress size={24} /> : (isSignUp ? 'Sign Up' : 'Log In')}
-          </Button>
-          
-          <Box textAlign="center">
-            <Link
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                toggleAuthMode();
-              }}
-              sx={{ cursor: 'pointer' }}
-            >
-              {isSignUp ? 'Existing user Log In' : 'New user Sign Up'}
-            </Link>
-          </Box>
-        </form>
-      </Paper>
-    </Container>
+            {isSignUp ? 'Existing user? Log In' : 'New user? Sign Up'}
+          </Link>
+        </Box>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default AuthForms;
+export default AuthModal;

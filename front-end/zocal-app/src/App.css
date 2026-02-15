@@ -1,3 +1,5 @@
+@import './styles/variables.css';
+
 .App {
   display: flex;
   flex-direction: column;
@@ -57,26 +59,6 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
-}
-
-/* Calendar Color Variables */
-:root {
-  --calendar-header-bg-light: #fff9c4;
-  --calendar-header-bg-dark: #4a4419;
-  --calendar-gatha-bg-light: #9370DB;
-  --calendar-gatha-bg-dark: #6A4C93;
-}
-
-/* Calendar specific styles - Light theme */
-:root {
-  --calendar-header-bg: var(--calendar-header-bg-light);
-  --calendar-gatha-bg: var(--calendar-gatha-bg-light);
-}
-
-/* Calendar specific styles - Dark theme */
-[data-theme="dark"] {
-  --calendar-header-bg: var(--calendar-header-bg-dark);
-  --calendar-gatha-bg: var(--calendar-gatha-bg-dark);
 }
 
 .calendar-day-header {

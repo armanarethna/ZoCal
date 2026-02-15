@@ -14,35 +14,26 @@ import {
   Checkbox,
   FormControlLabel,
   Divider,
-  Tabs,
-  Tab,
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { gregorianToZoroastrian, calendarTypes } from '../utils/zoroastrianCalendar';
+import { gregorianToZoroastrian, calendarTypes } from '../../utils/zoroastrianCalendar';
 import { 
   setRojCalendarType,
   setRojSelectedDate,
   setRojBeforeSunrise,
   setRojResult,
   setRojIsValidDate
-} from '../store/calendarSlice';
+} from '../../store/calendarSlice';
+import { ZOROASTRIAN_CALENDAR_TYPES } from '../../constants';
 
 const RojCalculatorTab = () => {
   const dispatch = useDispatch();
-  const { calendarType, selectedDate, beforeSunrise, result, isValidDate } = useSelector(state => state.calendar.rojCalculator);
+  const { selectedDate, calendarType, beforeSunrise, result, isValidDate } = useSelector(
+    (state) => state.calendar.rojCalculator
+  );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const handleCalendarTypeTabChange = (event, newValue) => {
-    const calendarTypes = ['Shenshai', 'Kadmi', 'Fasli'];
-    dispatch(setRojCalendarType(calendarTypes[newValue]));
-  };
-
-  const getCalendarTypeTabValue = () => {
-    const calendarTypes = ['Shenshai', 'Kadmi', 'Fasli'];
-    return calendarTypes.indexOf(calendarType);
-  };
 
   // Helper function to validate if a date string represents a valid date
   const validateDate = (dateString) => {
@@ -124,14 +115,14 @@ const RojCalculatorTab = () => {
       <Card sx={{ 
         maxWidth: 600, 
         mx: 'auto',
-        backgroundColor: 'background.paper',
+        backgroundColor: 'var(--background-paper)',
         boxShadow: 3,
         borderRadius: 2,
         border: '1px solid',
         borderColor: 'divider',
         mt: 2
       }}>
-        <CardContent sx={{ p: 2.5, backgroundColor: 'grey.50' }}>
+        <CardContent sx={{ p: 2.5, backgroundColor: 'var(--grey-50)' }}>
           <Typography variant="h6" gutterBottom>
             Gregorian to Zoroastrian
           </Typography>
@@ -139,29 +130,19 @@ const RojCalculatorTab = () => {
             <Box sx={{ mt: 2, mb: 2 }}>
               {isMobile ? (
                 <Box>
-                  {/* Mobile Layout - Tabs for Calendar Type */}
-                  <Box sx={{ mb: 2 }}>
-                    <Tabs
-                      value={getCalendarTypeTabValue()}
-                      onChange={handleCalendarTypeTabChange}
-                      variant="fullWidth"
-                      sx={{
-                        minHeight: 36,
-                        '& .MuiTab-root': {
-                          minHeight: 36,
-                          fontSize: '0.75rem',
-                          fontWeight: 'bold',
-                          py: 0.5,
-                          px: 1,
-                        },
-                        width: '100%',
-                      }}
+                  {/* Mobile Layout - Dropdowns on separate lines */}
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Calendar Type</InputLabel>
+                    <Select
+                      value={calendarType}
+                      label="Calendar Type"
+                      onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
                     >
-                      <Tab label="Shenshai" />
-                      <Tab label="Kadmi" />
-                      <Tab label="Fasli" />
-                    </Tabs>
-                  </Box>
+                      {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
+                        <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                   
                   {/* Date Input */}
                   <TextField
@@ -190,9 +171,9 @@ const RojCalculatorTab = () => {
                       label="Calendar Type"
                       onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
                     >
-                      <MenuItem value={calendarTypes.SHENSHAI}>Shenshai</MenuItem>
-                      <MenuItem value={calendarTypes.KADMI}>Kadmi</MenuItem>
-                      <MenuItem value={calendarTypes.FASLI}>Fasli</MenuItem>
+                      {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
+                        <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
 
@@ -233,7 +214,7 @@ const RojCalculatorTab = () => {
 
             <Box sx={{ 
               textAlign: 'center',
-              backgroundColor: 'primary.light',
+              backgroundColor: 'var(--primary-light)',
               borderRadius: 2,
               p: 2,
               mx: -1

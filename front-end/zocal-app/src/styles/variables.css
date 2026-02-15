@@ -1,0 +1,120 @@
+/* CSS Variables for Colors and Styles */
+
+:root {
+  /* Primary Colors */
+  --primary-main-light: #1976d2;
+  --primary-main-dark: #4285f4;
+  --primary-light-light: #42a5f5;
+  --primary-light-dark: #7baaf7;
+  --primary-dark-light: #0d47a1;
+  --primary-dark-dark: #1565c0;
+
+  /* Secondary Colors */
+  --secondary-main-light: #ff6f00;
+  --secondary-main-dark: #ff9800;
+
+  /* Success Colors */
+  --success-light: #81c784;
+  --success-main: #4caf50;
+  --success-dark: #388e3c;
+
+  /* Warning Colors */
+  --warning-light: #ffb74d;
+  --warning-main: #ff9800;
+  --warning-dark: #f57c00;
+
+  /* Background Colors */
+  --background-default-light: #fafafa;
+  --background-default-dark: #121212;
+  --background-paper-light: #ffffff;
+  --background-paper-dark: #1e1e1e;
+
+  /* Grey Colors */
+  --grey-50-light: #fafafa;
+  --grey-50-dark: #444444;
+  --grey-100-light: #f5f5f5;
+  --grey-100-dark: #2d2d2d;
+  --grey-200-light: #eeeeee;
+  --grey-200-dark: #404040;
+  --grey-400-light: #bdbdbd;
+  --grey-400-dark: #616161;
+  --grey-700: #616161;
+  --grey-800-light: #424242;
+  --grey-800-dark: #424242;
+  --grey-900-light: #212121;
+  --grey-900-dark: #212121;
+
+  /* Text Colors */
+  --text-primary-light: #000000;
+  --text-primary-dark: #ffffff;
+  --text-secondary-light: #666666;
+  --text-secondary-dark: #b3b3b3;
+
+  /* Border/Divider Colors */
+  --divider-light: #e0e0e0;
+  --divider-dark: #333333;
+
+  /* Calendar Specific Colors */
+  --calendar-header-bg-light: #fff9c4;
+  --calendar-header-bg-dark: #4a4419;
+  --calendar-gatha-bg-light: #9370DB;
+  --calendar-gatha-bg-dark: #6A4C93;
+
+  /* Gradient Colors */
+  --gradient-overlay-light: linear-gradient(rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.02));
+  --gradient-overlay-dark: linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02));
+
+  /* Event Card Background */
+  --event-card-bg-light: rgba(0, 0, 0, 0.02);
+  --event-card-bg-dark: rgba(255, 255, 255, 0.05);
+
+  /* Static Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+
+/* Light Theme Variables */
+:root {
+  --primary-main: var(--primary-main-light);
+  --primary-light: var(--primary-light-light);
+  --primary-dark: var(--primary-dark-light);
+  --secondary-main: var(--secondary-main-light);
+  --background-default: var(--background-default-light);
+  --background-paper: var(--background-paper-light);
+  --grey-50: var(--grey-50-light);
+  --grey-100: var(--grey-100-light);
+  --grey-200: var(--grey-200-light);
+  --grey-400: var(--grey-400-light);
+  --grey-800: var(--grey-800-light);
+  --grey-900: var(--grey-900-light);
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --divider: var(--divider-light);
+  --calendar-header-bg: var(--calendar-header-bg-light);
+  --calendar-gatha-bg: var(--calendar-gatha-bg-light);
+  --gradient-overlay: var(--gradient-overlay-light);
+  --event-card-bg: var(--event-card-bg-light);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  --primary-main: var(--primary-main-dark);
+  --primary-light: var(--primary-light-dark);
+  --primary-dark: var(--primary-dark-dark);
+  --secondary-main: var(--secondary-main-dark);
+  --background-default: var(--background-default-dark);
+  --background-paper: var(--background-paper-dark);
+  --grey-50: var(--grey-50-dark);
+  --grey-100: var(--grey-100-dark);
+  --grey-200: var(--grey-200-dark);
+  --grey-400: var(--grey-400-dark);
+  --grey-800: var(--grey-800-dark);
+  --grey-900: var(--grey-900-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --divider: var(--divider-dark);
+  --calendar-header-bg: var(--calendar-header-bg-dark);
+  --calendar-gatha-bg: var(--calendar-gatha-bg-dark);
+  --gradient-overlay: var(--gradient-overlay-dark);
+  --event-card-bg: var(--event-card-bg-dark);
+}

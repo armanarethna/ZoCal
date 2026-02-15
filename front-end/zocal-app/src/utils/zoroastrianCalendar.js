@@ -1,71 +1,11 @@
 // Zoroastrian Calendar Names and Conversion Functions
+import { MAH_NAMES, ROJ_NAMES, GATHA_NAMES, ZOROASTRIAN_CALENDAR_TYPES_ENUM } from '../constants';
 
-// Names of 12 Mahs (Months)
-export const mahNames = [
-  'Fravardin',
-  'Ardibehesht', 
-  'Khordad',
-  'Tir',
-  'Amardad',
-  'Shehrevar',
-  'Meher',
-  'Avan',
-  'Adar',
-  'Dae',
-  'Bahman',
-  'Aspandard'
-];
-
-// Names of 30 Rojs (Days)
-export const rojNames = [
-  'Hormazd',
-  'Bahman',
-  'Ardibehesht',
-  'Shehrevar',
-  'Aspandard',
-  'Khordad',
-  'Amardad',
-  'Dae-Pa-Adar',
-  'Adar',
-  'Avan',
-  'Khorshed',
-  'Mohor',
-  'Tir',
-  'Gosh',
-  'Dae-Pa-Meher',
-  'Meher',
-  'Srosh',
-  'Rashne',
-  'Fravardin',
-  'Behram',
-  'Ram',
-  'Govad',
-  'Dae-Pa-Din',
-  'Din',
-  'Ashishvangh',
-  'Ashtad',
-  'Asman',
-  'Zamyad',
-  'Mareshpand',
-  'Aneran'
-];
-
-// Names of 5 Gathas + 1 extra for Fasli leap years
-export const gathaNames = [
-  'Ahunavaiti',
-  'Ushtavaiti', 
-  'Spentamainyu',
-  'Vohuxshathra',
-  'Vahishtoishti',
-  'Avardad-sal-Gah'  // Extra gatha for Fasli leap years
-];
-
-// Calendar Types
-export const calendarTypes = {
-  SHENSHAI: 'Shenshai',
-  KADMI: 'Kadmi', 
-  FASLI: 'Fasli'
-};
+// Export the constants for backward compatibility
+export const mahNames = MAH_NAMES;
+export const rojNames = ROJ_NAMES;
+export const gathaNames = GATHA_NAMES;
+export const calendarTypes = ZOROASTRIAN_CALENDAR_TYPES_ENUM;
 
 // Reference start dates (Hormazd roj, Fravardin mah) - set to noon
 const REFERENCE_DATES = {

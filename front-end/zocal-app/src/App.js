@@ -4,19 +4,23 @@ import { ThemeProvider, Snackbar, Alert } from '@mui/material';
 import { toggleTheme } from './store/themeSlice';
 import { logout, getCurrentUser } from './store/authSlice';
 import { useAppTheme } from './theme/theme';
-import Header from './components/Header';
-import TabsNavigation from './components/TabsNavigation';
-import MainContent from './components/MainContent';
+import { useCSSVariableTheme } from './hooks/useCSSVariableTheme';
+import Header from './components/molecules/Header';
+import TabsNavigation from './components/molecules/TabsNavigation';
+import { DEFAULTS } from './constants';
 import './App.css';
 
 function App() {
-  const [tabValue, setTabValue] = useState(1);
+  const [tabValue, setTabValue] = useState(DEFAULTS.TAB_VALUE);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   
   const { darkMode } = useSelector((state) => state.theme);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const theme = useAppTheme();
+  
+  // Sync CSS variables with theme changes
+  useCSSVariableTheme();
 
   // Check for existing token on app initialization
   useEffect(() => {
@@ -46,7 +50,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <div className="App" style={{ 
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: 'var(--background-default)',
         minHeight: '100vh'
       }}>
         <Header 
@@ -56,11 +60,10 @@ function App() {
           handleLogout={handleLogout}
         />
         <TabsNavigation tabValue={tabValue} handleTabChange={handleTabChange} />
-        <MainContent tabValue={tabValue} />
         
         <Snackbar
           open={snackbar.open}
-          autoHideDuration={6000}
+          autoHideDuration={DEFAULTS.SNACKBAR_DURATION}
           onClose={handleSnackbarClose}
         >
           <Alert onClose={handleSnackbarClose} severity={snackbar.severity}>

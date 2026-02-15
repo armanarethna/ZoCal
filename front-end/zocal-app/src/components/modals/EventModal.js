@@ -22,8 +22,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
-import { createEvent, updateEvent, deleteEvent, clearError as clearEventsError } from '../store/eventsSlice';
-import { validateEventDate } from '../utils/eventUtils';
+import { createEvent, updateEvent, deleteEvent, clearError as clearEventsError } from '../../store/eventsSlice';
+import { validateEventDate } from '../../utils/eventUtils';
 
 const EventModal = ({ 
   open, 

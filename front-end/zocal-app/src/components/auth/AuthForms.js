@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
+  Paper,
+  Typography,
+  Container,
   TextField,
   Button,
   Link,
   CircularProgress,
-  Alert,
-  Box,
-  IconButton
+  Alert
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
-import { loginUser, registerUser, clearError } from '../store/authSlice';
+import { loginUser, registerUser, clearError } from '../../store/authSlice';
+import { VALIDATION_MESSAGES } from '../../constants';
 
-const AuthModal = ({ open, onClose }) => {
+const AuthForms = () => {
   const dispatch = useDispatch();
   const { loading: authLoading, error: authError } = useSelector(state => state.auth);
 
@@ -58,23 +56,23 @@ const AuthModal = ({ open, onClose }) => {
     const errors = {};
     
     if (isSignUp && !authFormData.name.trim()) {
-      errors.name = 'Name is required';
+      errors.name = VALIDATION_MESSAGES.NAME_REQUIRED;
     }
     
     if (!authFormData.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = VALIDATION_MESSAGES.EMAIL_REQUIRED;
     } else if (!/\S+@\S+\.\S+/.test(authFormData.email)) {
-      errors.email = 'Please enter a valid email';
+      errors.email = VALIDATION_MESSAGES.EMAIL_INVALID;
     }
     
     if (!authFormData.password) {
-      errors.password = 'Password is required';
+      errors.password = VALIDATION_MESSAGES.PASSWORD_REQUIRED;
     } else if (authFormData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = VALIDATION_MESSAGES.PASSWORD_LENGTH;
     }
     
     if (isSignUp && authFormData.password !== authFormData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = VALIDATION_MESSAGES.PASSWORDS_DONT_MATCH;
     }
     
     return errors;
@@ -106,59 +104,25 @@ const AuthModal = ({ open, onClose }) => {
           password: authFormData.password
         })).unwrap();
       }
-      // Close modal and reset form on success
-      onClose();
-      setAuthFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setAuthFormErrors({});
-      setIsSignUp(false);
     } catch (error) {
       // Error handled by Redux
     }
   };
 
-  const handleClose = () => {
-    onClose();
-    setAuthFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
-    setAuthFormErrors({});
-    setIsSignUp(false);
-    dispatch(clearError());
-  };
-
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
-      fullWidth
-      PaperProps={{
-        sx: { p: 1 }
-      }}
-    >
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-        {isSignUp ? 'Sign Up' : 'Log In'}
-        <IconButton onClick={handleClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      
-      <DialogContent>
+    <Container maxWidth="sm">
+      <Paper sx={{ p: 4, mt: 2 }}>
+        <Typography variant="h5" gutterBottom align="center">
+          {isSignUp ? 'Sign Up' : 'Log In'}
+        </Typography>
+        
         {authError && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {authError}
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleAuthSubmit} sx={{ mt: 1 }}>
+        <form onSubmit={handleAuthSubmit}>
           {isSignUp && (
             <TextField
               fullWidth
@@ -213,35 +177,33 @@ const AuthModal = ({ open, onClose }) => {
               required
             />
           )}
-        </Box>
-      </DialogContent>
-
-      <DialogActions sx={{ flexDirection: 'column', gap: 1, p: 3, pt: 1 }}>
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          onClick={handleAuthSubmit}
-          disabled={authLoading}
-        >
-          {authLoading ? <CircularProgress size={24} /> : (isSignUp ? 'Sign Up' : 'Log In')}
-        </Button>
-        
-        <Box textAlign="center">
-          <Link
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleAuthMode();
-            }}
-            sx={{ cursor: 'pointer' }}
+          
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={authLoading}
           >
-            {isSignUp ? 'Existing user? Log In' : 'New user? Sign Up'}
-          </Link>
-        </Box>
-      </DialogActions>
-    </Dialog>
+            {authLoading ? <CircularProgress size={24} /> : (isSignUp ? 'Sign Up' : 'Log In')}
+          </Button>
+          
+          <Box textAlign="center">
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                toggleAuthMode();
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              {isSignUp ? 'Existing user Log In' : 'New user Sign Up'}
+            </Link>
+          </Box>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 
-export default AuthModal;
+export default AuthForms;

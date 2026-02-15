@@ -5,31 +5,23 @@ import {
   Typography,
   Paper,
   Container,
-  Tabs,
-  Tab,
-  useMediaQuery,
-  useTheme
 } from '@mui/material';
 import { 
-  CalendarToday as GregorianIcon, 
-  Event as ZoroastrianIcon,
   EventNote as EventIcon
 } from '@mui/icons-material';
 
 // Components
-import EventModal from './EventModal';
-import GregorianEventTable from './GregorianEventTable';
-import ZoroastrianEventTable from './ZoroastrianEventTable';
+import EventModal from '../modals/EventModal';
+import GregorianEventTable from '../molecules/GregorianEventTable';
+import ZoroastrianEventTable from '../molecules/ZoroastrianEventTable';
 
 // Redux actions
-import { getAllEvents } from '../store/eventsSlice';
+import { getAllEvents } from '../../store/eventsSlice';
 
 const EventsTab = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector(state => state.auth);
   const { events = [], loading: eventsLoading, error: eventsError } = useSelector(state => state.events);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Table view state
   const [viewType, setViewType] = useState('gregorian');
@@ -50,14 +42,8 @@ const EventsTab = () => {
   }, [dispatch, isAuthenticated, user]);
 
   // Handle view type change
-  const handleViewTypeChange = (event, newValue) => {
-    const viewTypes = ['gregorian', 'zoroastrian'];
-    setViewType(viewTypes[newValue]);
-  };
-
-  const getViewTypeTabValue = () => {
-    const viewTypes = ['gregorian', 'zoroastrian'];
-    return viewTypes.indexOf(viewType);
+  const handleViewTypeChange = (event) => {
+    setViewType(event.target.value);
   };
 
   // Handle opening event modal for adding
@@ -102,69 +88,27 @@ const EventsTab = () => {
               p: 4, 
               mt: 2, 
               textAlign: 'center',
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+              backgroundColor: 'var(--event-card-bg)',
               border: (theme) => `1px solid ${theme.palette.divider}`
             }}
           >
             <EventIcon 
               sx={{ 
                 fontSize: 60, 
-                color: 'primary.main', 
+                color: 'var(--primary-main)', 
                 mb: 2 
               }} 
             />
             <Typography variant="h6" gutterBottom>
               Event Management
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: 'var(--text-secondary)' }}>
               Sign Up / Log In to save and view Gregorian and Zoroastrian events
             </Typography>
           </Paper>
         </Container>
       ) : (
         <Box sx={{ position: 'relative' }}>
-          {/* Table Type Toggle - Sticky */}
-          <Box sx={{ 
-            position: 'sticky',
-            top: isMobile ? 96 : 128,
-            zIndex: 1199,
-            backgroundColor: 'background.default',
-            borderBottom: 1,
-            borderColor: 'divider',
-            margin: 0,
-            padding: 0,
-            width: '100%',
-            boxSizing: 'border-box'
-          }}>
-            <Tabs
-              value={getViewTypeTabValue()}
-              onChange={handleViewTypeChange}
-              variant="fullWidth"
-              sx={{
-                '& .MuiTab-root': {
-                  fontWeight: 'bold',
-                  py: 1,
-                  px: 2,
-                },
-                width: '100%',
-                backgroundColor: 'background.default',
-                margin: 0,
-                padding: 0
-              }}
-            >
-              <Tab 
-                label="GREGORIAN" 
-                icon={<GregorianIcon />}
-                iconPosition="start"
-              />
-              <Tab 
-                label="ZOROASTRIAN" 
-                icon={<ZoroastrianIcon />}
-                iconPosition="start"
-              />
-            </Tabs>
-          </Box>
-
           {/* Render appropriate table based on view type */}
           {viewType === 'gregorian' ? (
             <GregorianEventTable
@@ -174,6 +118,8 @@ const EventsTab = () => {
               onEditEvent={handleEditEvent}
               onDeleteEvent={handleDeleteClick}
               onAddEvent={handleAddEvent}
+              viewType={viewType}
+              onViewTypeChange={handleViewTypeChange}
             />
           ) : (
             <ZoroastrianEventTable
@@ -183,6 +129,8 @@ const EventsTab = () => {
               onEditEvent={handleEditEvent}
               onDeleteEvent={handleDeleteClick}
               onAddEvent={handleAddEvent}
+              viewType={viewType}
+              onViewTypeChange={handleViewTypeChange}
             />
           )}
         </Box>

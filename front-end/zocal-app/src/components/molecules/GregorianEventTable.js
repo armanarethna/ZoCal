@@ -19,7 +19,11 @@ import {
   Stack,
   useMediaQuery,
   useTheme,
-  Button
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -33,7 +37,7 @@ import {
   calculateDaysRemaining,
   formatDisplayDate,
   sortEventsByNextOccurrence
-} from '../utils/eventUtils';
+} from '../../utils/eventUtils';
 
 const GregorianEventTable = ({ 
   events = [], 
@@ -41,7 +45,9 @@ const GregorianEventTable = ({
   error, 
   onEditEvent, 
   onDeleteEvent,
-  onAddEvent
+  onAddEvent,
+  viewType,
+  onViewTypeChange
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -56,30 +62,46 @@ const GregorianEventTable = ({
         position: 'sticky', 
         top: isMobile ? 144 : 192, 
         zIndex: 1100, 
-        backgroundColor: 'background.default',
-        py: 2,
+        backgroundColor: 'var(--background-default)',
+        pt: 0,
+        pb: 1,
         borderBottom: 1,
         borderColor: 'divider'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h4" sx={{ color: 'text.primary' }}>Events</Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onAddEvent}
-            sx={{
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              minWidth: isMobile ? 'auto' : '140px',
-              px: isMobile ? 2 : 3
-            }}
-          >
-            {isMobile ? 'Add' : 'Add Event'}
-          </Button>
+          <FormControl size="medium" sx={{ minWidth: 150 }}>
+            <InputLabel>Event Type</InputLabel>
+            <Select
+              value={viewType}
+              label="Event Type"
+              onChange={onViewTypeChange}
+            >
+              <MenuItem value="gregorian">Gregorian</MenuItem>
+              <MenuItem value="zoroastrian">Zoroastrian</MenuItem>
+            </Select>
+          </FormControl>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              startIcon={!isMobile ? <AddIcon /> : null}
+              onClick={onAddEvent}
+              sx={{
+                fontSize: isMobile ? '0.8rem' : '1rem',
+                minWidth: isMobile ? 'auto' : '140px',
+                px: isMobile ? 1 : 3,
+                py: isMobile ? 1 : undefined,
+                borderRadius: isMobile ? '50%' : undefined,
+                aspectRatio: isMobile ? '1' : 'auto'
+              }}
+            >
+              {isMobile ? <AddIcon /> : 'Add Event'}
+            </Button>
+          </Box>
         </Box>
       </Box>
       
       {/* Content with spacing */}
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 4 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -92,7 +114,7 @@ const GregorianEventTable = ({
         </Box>
       ) : sortedEvents.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" sx={{ color: 'var(--text-secondary)' }}>
             Add new event to get started
           </Typography>
         </Paper>
@@ -114,7 +136,7 @@ const GregorianEventTable = ({
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {event.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
                           {event.category}
                         </Typography>
                         <Typography variant="body2">
@@ -143,7 +165,7 @@ const GregorianEventTable = ({
                       <Stack spacing={0.5} alignItems="center">
                         <IconButton
                           size="small"
-                          color="primary"
+                          sx={{ color: 'var(--primary-main)' }}
                           onClick={() => onEditEvent(event)}
                         >
                           <EditIcon fontSize="small" />
@@ -211,7 +233,7 @@ const GregorianEventTable = ({
                   <TableCell className="data-column">{event.beforeSunrise ? 'Yes' : 'No'}</TableCell>
                   <TableCell className="action-column">
                     <IconButton
-                      color="primary"
+                        sx={{ color: 'var(--primary-main)' }}
                       onClick={() => onEditEvent(event)}
                     >
                       <EditIcon />
