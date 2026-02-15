@@ -75,7 +75,7 @@ const GregorianEventTable = ({
             const years = calculateYears(event.eventDate);
             const days = calculateDaysRemaining(event.eventDate);
             const yearsText = `${years} ${years === 1 ? 'year' : 'years'}`;
-            const daysText = days === "Today" ? "Today" : `${days} ${days === 1 ? 'day' : 'days'} to go`;
+            const daysText = days === "Today" ? "Today" : `in ${days} ${days === 1 ? 'day' : 'days'}`;
             return (
               <Card key={event._id} variant="outlined">
                 <CardContent sx={{ p: 2 }}>
@@ -163,7 +163,7 @@ const GregorianEventTable = ({
                 <TableCell className="data-column">Category</TableCell>
                 <TableCell className="data-column">Date</TableCell>
                 <TableCell className="data-column">Years</TableCell>
-                <TableCell className="data-column">Days Left</TableCell>
+                <TableCell className="data-column">Days Remaining</TableCell>
                 <TableCell className="data-column">Before Sunrise</TableCell>
                 <TableCell className="action-column"></TableCell>
                 <TableCell className="action-column"></TableCell>
@@ -176,7 +176,10 @@ const GregorianEventTable = ({
                   <TableCell className="data-column">{event.category}</TableCell>
                   <TableCell className="data-column">{formatDisplayDate(event.eventDate)}</TableCell>
                   <TableCell className="data-column">{calculateYears(event.eventDate)}</TableCell>
-                  <TableCell className="data-column">{calculateDaysRemaining(event.eventDate)}</TableCell>
+                  <TableCell className="data-column">{(() => {
+                    const days = calculateDaysRemaining(event.eventDate);
+                    return days === "Today" ? "Today" : `${days} ${days === 1 ? 'day' : 'days'}`;
+                  })()}</TableCell>
                   <TableCell className="data-column">{event.beforeSunrise ? 'Yes' : 'No'}</TableCell>
                   <TableCell className="action-column">
                     <IconButton

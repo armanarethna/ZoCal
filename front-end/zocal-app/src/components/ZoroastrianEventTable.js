@@ -116,7 +116,14 @@ const ZoroastrianEventTable = ({
             const zoroEvent = convertEventToZoroastrian(event, calendarType);
             const fallsOnText = calculateNextGregorianDate(event, calendarType, formatDisplayDate);
             const daysRemaining = calculateZoroastrianDaysRemaining(event, calendarType);
-            const daysText = daysRemaining === "Today" ? "Today" : `${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} to go`;
+            // Parse the number from the formatted string if it's not "Today" or "N/A"
+            let daysText;
+            if (daysRemaining === "Today" || daysRemaining === "N/A") {
+              daysText = daysRemaining;
+            } else {
+              const daysNumber = parseInt(daysRemaining.split(' ')[0]);
+              daysText = `in ${daysNumber} ${daysNumber === 1 ? 'day' : 'days'}`;
+            }
             return (
               <Card key={event._id} variant="outlined">
                 <CardContent sx={{ p: 2 }}>
@@ -209,7 +216,7 @@ const ZoroastrianEventTable = ({
                 <TableCell className="data-column">Roj</TableCell>
                 <TableCell className="data-column">Mah</TableCell>
                 <TableCell className="data-column">Falls On</TableCell>
-                <TableCell className="data-column">Days Left</TableCell>
+                <TableCell className="data-column">Days Remaining</TableCell>
                 <TableCell className="action-column"></TableCell>
                 <TableCell className="action-column"></TableCell>
               </TableRow>
@@ -229,7 +236,15 @@ const ZoroastrianEventTable = ({
                       {zoroEvent.isGatha ? 'GATHA' : zoroEvent.mah}
                     </TableCell>
                     <TableCell className="data-column">{calculateNextGregorianDate(event, calendarType, formatDisplayDate)}</TableCell>
-                    <TableCell className="data-column">{calculateZoroastrianDaysRemaining(event, calendarType)}</TableCell>
+                    <TableCell className="data-column">{(() => {
+                      const daysRemaining = calculateZoroastrianDaysRemaining(event, calendarType);
+                      if (daysRemaining === "Today" || daysRemaining === "N/A") {
+                        return daysRemaining;
+                      } else {
+                        const daysNumber = parseInt(daysRemaining.split(' ')[0]);
+                        return `${daysNumber} ${daysNumber === 1 ? 'day' : 'days'}`;
+                      }
+                    })()}</TableCell>
                     <TableCell className="action-column">
                       <IconButton
                         color="primary"
