@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Tabs,
   Tab,
+  Box,
   useMediaQuery,
   useTheme
 } from '@mui/material';
@@ -16,20 +17,26 @@ const TabsNavigation = ({ tabValue, handleTabChange }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <Tabs
-      value={tabValue}
-      onChange={handleTabChange}
-      variant="fullWidth"
-      textColor="primary"
-      indicatorColor="primary"
-      sx={{ 
-        borderTop: 1, 
-        borderBottom: 1,
-        borderColor: 'divider',
-        backgroundColor: 'background.paper',
-        minHeight: isMobile ? 48 : 64
-      }}
-    >
+    <Box sx={{ 
+      position: 'sticky', 
+      top: isMobile ? 48 : 64, 
+      zIndex: 1200, 
+      backgroundColor: 'background.paper',
+      borderTop: 1,
+      borderBottom: 1,
+      borderColor: 'divider'
+    }}>
+      <Tabs
+        value={tabValue}
+        onChange={handleTabChange}
+        variant="fullWidth"
+        textColor="primary"
+        indicatorColor="primary"
+        sx={{ 
+          backgroundColor: 'background.paper',
+          minHeight: isMobile ? 48 : 64
+        }}
+      >
       <Tab
         icon={<Calculate fontSize={isMobile ? "small" : "medium"} />}
         label={isMobile ? "Roj Calc" : "Roj Calculator"}
@@ -97,7 +104,8 @@ const TabsNavigation = ({ tabValue, handleTabChange }) => {
           }
         }}
       />
-    </Tabs>
+      </Tabs>
+    </Box>
   );
 };
 

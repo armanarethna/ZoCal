@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Box,
-  Paper,
   Typography,
   Container,
   Card,
@@ -20,7 +19,6 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { Calculate } from '@mui/icons-material';
 import { gregorianToZoroastrian, calendarTypes } from '../utils/zoroastrianCalendar';
 import { 
   setRojCalendarType,
