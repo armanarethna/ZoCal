@@ -131,3 +131,27 @@ export const DEFAULTS = {
   TAB_VALUE: 1, // Calendar tab
   SNACKBAR_DURATION: 6000
 };
+
+// =============================================
+// CALENDAR INFORMATION
+// =============================================
+
+// Common information for all calendars
+export const CALENDAR_COMMON_INFO = {
+  ROJ: 'Roj (R): refers to day names. There are 30 in each month.',
+  MAH: 'Mah (M): refers to month names. There are 12 in each year.',
+  GATHA: 'Gatha (G): refers to the 5 days of prayers added to complete the solar cycle (365 days) at the end of the year.'
+};
+
+// Calendar-specific information
+export const CALENDAR_SPECIFIC_INFO = {
+  Shenshai: {
+    description: 'Shenshai means imperial. Calendar instituted by the Parsis in India in 1129.'
+  },
+  Kadmi: {
+    description: 'Kadmi means ancient. The most ancient of all 3 calendars.'
+  },
+  Fasli: {
+    description: 'Fasli means seasonal. The most recent of all 3 calendars devised by Khurshedji Cama in 1906. Contains an extra Gatha day (leap day) in Gregorian leap years.'
+  }
+};

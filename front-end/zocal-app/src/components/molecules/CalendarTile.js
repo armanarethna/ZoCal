@@ -15,22 +15,23 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   const isFirstRojOfFirstMah = isFirstRojOfMah && zoroastrianDate.mahIndex === 0;
   const isFirstRojOfOtherMah = isFirstRojOfMah && zoroastrianDate.mahIndex > 0;
   
+  // Check if this tile should have white text (special background colors)
+  const shouldHaveWhiteText = isFirstRojOfFirstMah || isFirstRojOfOtherMah || zoroastrianDate.isGatha;
+  
+  const getCalendarTileBackgroundColor = () => {
+    if (isCurrentMonth && isFirstRojOfFirstMah) return 'var(--success-light)'; // Green for first roj of Fravardin
+    if (isCurrentMonth && isFirstRojOfOtherMah) return 'var(--warning-light)'; // Orange/amber for first roj of other mahs
+    if (isCurrentMonth && zoroastrianDate.isGatha) return 'var(--calendar-gatha-bg)';
+    if (isCurrentMonth) return 'var(--background-paper)';
+    return 'var(--grey-100)';
+  };
+  
   return (
     <Card 
       elevation={isDayToday ? 3 : 1}
       sx={{ 
         minHeight: isMobile ? 45 : 75,
-        backgroundColor: isDayToday 
-          ? 'var(--primary-main)'
-          : (isCurrentMonth && isFirstRojOfFirstMah)
-            ? 'var(--success-light)'  // Green for first roj of Fravardin
-          : (isCurrentMonth && isFirstRojOfOtherMah)
-            ? 'var(--warning-light)'  // Orange/amber for first roj of other mahs
-          : (isCurrentMonth && zoroastrianDate.isGatha)
-            ? 'var(--calendar-gatha-bg)'
-            : isCurrentMonth 
-              ? 'var(--background-paper)'
-              : 'var(--grey-100)',
+        backgroundColor: getCalendarTileBackgroundColor(),
         border: isDayToday ? 2 : 1,
         borderColor: isDayToday ? 'primary.dark' : 'divider',
         transition: 'all 0.2s ease-in-out'
@@ -51,7 +52,7 @@ const CalendarTile = ({ dayObj, calendarType }) => {
             <Typography 
               variant={isMobile ? "body2" : "h6"} 
               fontWeight={isDayToday ? 'bold' : 'normal'}
-              color={(isDayToday || isFirstRojOfFirstMah || isFirstRojOfOtherMah || zoroastrianDate.isGatha) ? 'var(--color-white)' : 'var(--primary-main)'}
+              color={shouldHaveWhiteText ? 'var(--color-white)' : 'var(--primary-main)'}
               align="center"
               sx={{ 
                 mb: isMobile ? 0.25 : 0.5,
@@ -66,10 +67,8 @@ const CalendarTile = ({ dayObj, calendarType }) => {
             <Typography 
               variant="caption" 
               display="block"
-              color={(isDayToday || isFirstRojOfFirstMah || isFirstRojOfOtherMah || zoroastrianDate.isGatha)
-                ? 'white' 
-                : 'text.primary'
-              }
+              fontWeight={isDayToday ? 'bold' : 'normal'}
+              color={shouldHaveWhiteText ? 'white' : 'text.primary'}
               align="center"
               sx={{ 
                 fontSize: isMobile ? '0.5rem' : '0.65rem',

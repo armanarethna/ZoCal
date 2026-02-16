@@ -60,7 +60,7 @@ const GregorianEventTable = ({
       {/* Sticky Header */}
       <Box sx={{ 
         position: 'sticky', 
-        top: isMobile ? 144 : 192, 
+        top: isMobile ? 144 : 144, 
         zIndex: 1100, 
         backgroundColor: 'var(--background-default)',
         pt: 0,

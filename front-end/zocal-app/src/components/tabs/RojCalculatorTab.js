@@ -18,6 +18,7 @@ import {
   useTheme
 } from '@mui/material';
 import { gregorianToZoroastrian, calendarTypes } from '../../utils/zoroastrianCalendar';
+import CalendarInfoBox from '../molecules/CalendarInfoBox';
 import { 
   setRojCalendarType,
   setRojSelectedDate,
@@ -235,6 +236,13 @@ const RojCalculatorTab = () => {
             </Box>
           </CardContent>
         </Card>
+        <Box sx={{ 
+          maxWidth: 600, 
+          mx: 'auto',
+          mt: 2
+        }}>
+          <CalendarInfoBox calendarType={calendarType} />
+        </Box>
       </Container>
     );
   };

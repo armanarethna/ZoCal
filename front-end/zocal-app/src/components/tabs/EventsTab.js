@@ -108,7 +108,7 @@ const EventsTab = () => {
           </Paper>
         </Container>
       ) : (
-        <Box sx={{ position: 'relative' }}>
+        <>
           {/* Render appropriate table based on view type */}
           {viewType === 'gregorian' ? (
             <GregorianEventTable
@@ -133,7 +133,7 @@ const EventsTab = () => {
               onViewTypeChange={handleViewTypeChange}
             />
           )}
-        </Box>
+        </>
       )}
       
       {/* Event Modal */}

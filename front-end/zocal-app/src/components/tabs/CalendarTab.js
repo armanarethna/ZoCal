@@ -12,6 +12,7 @@ import { nextMonth, prevMonth, goToToday, setCurrentDate } from '../../store/cal
 import CalendarTile from '../molecules/CalendarTile';
 import MobileCalendarHeader from '../molecules/MobileCalendarHeader';
 import DesktopCalendarHeader from '../molecules/DesktopCalendarHeader';
+import CalendarInfoBox from '../molecules/CalendarInfoBox';
 import { WEEKDAYS_FULL, WEEKDAYS_SHORT, DEFAULTS } from '../../constants';
 
 const CalendarTab = () => {
@@ -78,7 +79,7 @@ const CalendarTab = () => {
   const isCurrentMonth = isSameMonth(currentDate, today);
 
   return (
-    <Box sx={{ p: isMobile ? 0 : 'inherit' }}>
+    <Box sx={{ p: '0' }}>
       {/* Calendar Header */}
       <Paper 
         elevation={2}
@@ -173,6 +174,8 @@ const CalendarTab = () => {
           ))}
         </Box>
       </Paper>
+
+      <CalendarInfoBox calendarType={calendarType} />
     </Box>
   );
 };
