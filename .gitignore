@@ -48,3 +48,6 @@ ehthumbs.db
 
 # Production build files
 front-end/zocal-app/build/
+
+# Vercel
+.vercel

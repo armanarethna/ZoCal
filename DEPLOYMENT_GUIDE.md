@@ -50,9 +50,9 @@ Your code is already committed to Git. Now:
    
    # Set environment variables
    heroku config:set NODE_ENV=production
-   heroku config:set JWT_SECRET="ed6663b8253b46af9d8a34ece6ca0ba8"
-   heroku config:set MONGODB_URI="mongodb+srv://armanarethna_db_user:rTtffot8CjRhp3Fm@cluster0.phq0ozd.mongodb.net/?appName=Cluster0"
-   heroku config:set CLIENT_URL="https://zocal.vercel.app"
+   heroku config:set JWT_SECRET="your-super-strong-jwt-secret-here"
+   heroku config:set MONGODB_URI="mongodb+srv://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_CLUSTER.mongodb.net/YOUR_DATABASE"
+   heroku config:set CLIENT_URL="https://your-frontend-app.vercel.app"
    
    # Deploy backend only
    git subtree push --prefix=back-end heroku main

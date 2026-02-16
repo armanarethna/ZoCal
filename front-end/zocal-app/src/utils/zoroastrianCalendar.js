@@ -290,3 +290,22 @@ export const sortEventsByZoroastrianOccurrence = (events, calendarType) => {
     return numA - numB;
   });
 };
+
+// Determine the type of Zoroastrian day
+export const zoroDayType = (zoroastrianDate) => {
+  if (zoroastrianDate.isGatha) {
+    return 'Gatha';
+  }
+  
+  const isFirstRojOfMah = zoroastrianDate.rojIndex === 0;
+  
+  if (isFirstRojOfMah && zoroastrianDate.mahIndex === 0) {
+    return 'Navroze'; // First day of year (Hormazd roj, Fravardin mah)
+  }
+  
+  if (isFirstRojOfMah && zoroastrianDate.mahIndex > 0) {
+    return 'HormuzRoj'; // First day of other months
+  }
+  
+  return 'Default';
+};

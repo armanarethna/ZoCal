@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { format } from 'date-fns';
-import { gregorianToZoroastrian } from '../../utils/zoroastrianCalendar';
+import { gregorianToZoroastrian, zoroDayType } from '../../utils/zoroastrianCalendar';
 
 const CalendarTile = ({ dayObj, calendarType }) => {
   const theme = useTheme();
@@ -9,21 +9,24 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   
   const { date, isCurrentMonth, isToday: isDayToday } = dayObj;
   const zoroastrianDate = gregorianToZoroastrian(date, calendarType);
-  
-  // Check if this is the first roj of any mah
-  const isFirstRojOfMah = !zoroastrianDate.isGatha && zoroastrianDate.rojIndex === 0;
-  const isFirstRojOfFirstMah = isFirstRojOfMah && zoroastrianDate.mahIndex === 0;
-  const isFirstRojOfOtherMah = isFirstRojOfMah && zoroastrianDate.mahIndex > 0;
+  const dayType = zoroDayType(zoroastrianDate);
   
   // Check if this tile should have white text (special background colors)
-  const shouldHaveWhiteText = isFirstRojOfFirstMah || isFirstRojOfOtherMah || zoroastrianDate.isGatha;
+  const shouldHaveWhiteText = dayType !== 'Default';
   
   const getCalendarTileBackgroundColor = () => {
-    if (isCurrentMonth && isFirstRojOfFirstMah) return 'var(--success-light)'; // Green for first roj of Fravardin
-    if (isCurrentMonth && isFirstRojOfOtherMah) return 'var(--warning-light)'; // Orange/amber for first roj of other mahs
-    if (isCurrentMonth && zoroastrianDate.isGatha) return 'var(--calendar-gatha-bg)';
-    if (isCurrentMonth) return 'var(--background-paper)';
-    return 'var(--grey-100)';
+    if (!isCurrentMonth) return 'var(--grey-100)';
+    
+    switch (dayType) {
+      case 'Navroze':
+        return 'var(--success-light)'; // Green for Navroze (first day of year)
+      case 'HormuzRoj':
+        return 'var(--warning-light)'; // Orange/amber for first day of other months
+      case 'Gatha':
+        return 'var(--calendar-gatha-bg)';
+      default:
+        return 'var(--background-paper)';
+    }
   };
   
   return (
