@@ -15,14 +15,13 @@ const eventSchema = new mongoose.Schema({
     maxlength: [50, 'Event name cannot exceed 50 characters']
   },
   
-  // Event Category (Birthday, Anniversary, Others)
+  // Event Category (Birthday, Anniversary, or custom)
   category: {
     type: String,
     required: [true, 'Event category is required'],
-    enum: {
-      values: ['Birthday', 'Anniversary', 'Other'],
-      message: 'Category must be Birthday, Anniversary, or Other'
-    },
+    trim: true,
+    minlength: [2, 'Category must be at least 2 characters'],
+    maxlength: [50, 'Category cannot exceed 50 characters'],
     default: 'Other'
   },
   
@@ -46,6 +45,33 @@ const eventSchema = new mongoose.Schema({
       message: 'Reminder days must be 0, 1, 3, 7, or 30'
     },
     default: 0
+  },
+  
+  // Reminder time settings
+  reminder_time_hour: {
+    type: Number,
+    min: [1, 'Hour must be between 1 and 12'],
+    max: [12, 'Hour must be between 1 and 12'],
+    default: 12
+  },
+  
+  reminder_time_ampm: {
+    type: String,
+    enum: {
+      values: ['AM', 'PM'],
+      message: 'Time period must be AM or PM'
+    },
+    default: 'PM'
+  },
+  
+  // What calendar type(s) to send reminders for
+  reminder_for: {
+    type: String,
+    enum: {
+      values: ['Zoroastrian', 'Gregorian', 'Both'],
+      message: 'Reminder for must be Zoroastrian, Gregorian, or Both'
+    },
+    default: 'Zoroastrian'
   },
   
   // User who created this event

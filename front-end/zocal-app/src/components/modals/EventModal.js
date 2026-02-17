@@ -16,7 +16,8 @@ import {
   FormControlLabel,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  Typography
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -39,9 +40,13 @@ const EventModal = ({
   const [eventFormData, setEventFormData] = useState({
     name: editingEvent?.name || '',
     category: editingEvent?.category || 'Birthday',
+    customCategory: '',
     eventDate: editingEvent ? new Date(editingEvent.eventDate) : new Date(),
     beforeSunrise: editingEvent?.beforeSunrise || false,
-    reminder_days: editingEvent?.reminder_days || 0
+    reminder_days: editingEvent?.reminder_days || 0,
+    reminder_time_hour: editingEvent?.reminder_time_hour || 12,
+    reminder_time_ampm: editingEvent?.reminder_time_ampm || 'PM',
+    reminder_for: editingEvent?.reminder_for || 'Zoroastrian'
   });
   const [eventFormErrors, setEventFormErrors] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -49,20 +54,29 @@ const EventModal = ({
   // Update form data when editingEvent changes
   React.useEffect(() => {
     if (editingEvent) {
+      const isCustomCategory = !['Birthday', 'Anniversary'].includes(editingEvent.category);
       setEventFormData({
         name: editingEvent.name,
-        category: editingEvent.category,
+        category: isCustomCategory ? 'Other' : editingEvent.category,
+        customCategory: isCustomCategory ? editingEvent.category : '',
         eventDate: new Date(editingEvent.eventDate),
         beforeSunrise: editingEvent.beforeSunrise,
-        reminder_days: editingEvent.reminder_days || 0
+        reminder_days: editingEvent.reminder_days || 0,
+        reminder_time_hour: editingEvent.reminder_time_hour || 12,
+        reminder_time_ampm: editingEvent.reminder_time_ampm || 'PM',
+        reminder_for: editingEvent.reminder_for || 'Zoroastrian'
       });
     } else {
       setEventFormData({
         name: '',
         category: 'Birthday',
+        customCategory: '',
         eventDate: new Date(),
         beforeSunrise: false,
-        reminder_days: 0
+        reminder_days: 0,
+        reminder_time_hour: 12,
+        reminder_time_ampm: 'PM',
+        reminder_for: 'Zoroastrian'
       });
     }
     setEventFormErrors({});
@@ -84,6 +98,18 @@ const EventModal = ({
     
     if (!eventFormData.name.trim()) {
       errors.name = 'Name is required';
+    }
+    
+    if (eventFormData.category === 'Other' && !eventFormData.customCategory.trim()) {
+      errors.customCategory = 'Custom category is required when Other is selected';
+    }
+    
+    if (eventFormData.category === 'Other' && eventFormData.customCategory.trim().length < 5) {
+      errors.customCategory = 'Custom category must be at least 5 characters';
+    }
+    
+    if (eventFormData.category === 'Other' && eventFormData.customCategory.trim().length > 50) {
+      errors.customCategory = 'Custom category cannot exceed 50 characters';
     }
     
     if (!eventFormData.eventDate) {
@@ -115,9 +141,13 @@ const EventModal = ({
       const eventData = {
         name: eventFormData.name,
         category: eventFormData.category,
+        customCategory: eventFormData.customCategory,
         eventDate: `${eventFormData.eventDate.getFullYear()}-${String(eventFormData.eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventFormData.eventDate.getDate()).padStart(2, '0')}`, // Local date format YYYY-MM-DD
         beforeSunrise: eventFormData.beforeSunrise,
-        reminder_days: eventFormData.reminder_days
+        reminder_days: eventFormData.reminder_days,
+        reminder_time_hour: eventFormData.reminder_time_hour,
+        reminder_time_ampm: eventFormData.reminder_time_ampm,
+        reminder_for: eventFormData.reminder_for
       };
       
       if (editingEvent) {
@@ -154,9 +184,13 @@ const EventModal = ({
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       {/* Event Modal */}
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ pb: 1 }}>{editingEvent ? 'Edit Gregorian Event' : 'Add Gregorian Event'}</DialogTitle>
+        <DialogTitle sx={{ pb: 1 }}>{editingEvent ? 'Edit Event' : 'Add Event'}</DialogTitle>
         <form onSubmit={handleEventSubmit}>
           <DialogContent sx={{ pt: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Create a Gregorian date event and the ZoCal app will auto calculate Zoroastrian event details.
+            </Typography>
+            
             <TextField
               fullWidth
               label="Name"
@@ -180,22 +214,40 @@ const EventModal = ({
               </Select>
             </FormControl>
             
+            {/* Custom Category Input - show only when "Other" is selected */}
+            {eventFormData.category === 'Other' && (
+              <TextField
+                fullWidth
+                label="Custom Category"
+                value={eventFormData.customCategory}
+                onChange={(e) => handleEventFormChange('customCategory', e.target.value)}
+                error={!!eventFormErrors.customCategory}
+                helperText={eventFormErrors.customCategory}
+                required
+                sx={{ mt: 2 }}
+                inputProps={{
+                  minLength: 5,
+                  maxLength: 50
+                }}
+                placeholder="Enter custom category (5-50 characters)"
+              />
+            )}
+            
             <DatePicker
               label="Gregorian Date"
               value={eventFormData.eventDate}
               onChange={(date) => handleEventFormChange('eventDate', date)}
               format="dd-MMM-yyyy"
-              sx={{ mt: 2 }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  fullWidth
-                  margin="normal"
-                  error={!!eventFormErrors.eventDate}
-                  helperText={eventFormErrors.eventDate}
-                  required
-                />
-              )}
+              sx={{ mt: 2, width: '100%' }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "normal",
+                  error: !!eventFormErrors.eventDate,
+                  helperText: eventFormErrors.eventDate,
+                  required: true
+                }
+              }}
               maxDate={new Date()}
               minDate={new Date(new Date().getFullYear() - 100, 0, 1)}
             />
@@ -225,6 +277,55 @@ const EventModal = ({
                 <MenuItem value={30}>1 Month Before</MenuItem>
               </Select>
             </FormControl>
+
+            {/* Show additional reminder settings if reminder is enabled */}
+            {eventFormData.reminder_days > 0 && (
+              <>
+                {/* Reminder Time Selector */}
+                <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                  <FormControl sx={{ minWidth: 120, flex: 1 }}>
+                    <InputLabel>Reminder Time</InputLabel>
+                    <Select
+                      value={eventFormData.reminder_time_hour}
+                      onChange={(e) => handleEventFormChange('reminder_time_hour', e.target.value)}
+                      label="Reminder Time"
+                    >
+                      {[...Array(12)].map((_, i) => (
+                        <MenuItem key={i + 1} value={i + 1}>
+                          {i + 1}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl sx={{ minWidth: 80 }}>
+                    <InputLabel>Period</InputLabel>
+                    <Select
+                      value={eventFormData.reminder_time_ampm}
+                      onChange={(e) => handleEventFormChange('reminder_time_ampm', e.target.value)}
+                      label="Period"
+                    >
+                      <MenuItem value="AM">AM</MenuItem>
+                      <MenuItem value="PM">PM</MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>
+
+                {/* Reminder For Selector */}
+                <FormControl fullWidth margin="normal" sx={{ mt: 2 }}>
+                  <InputLabel>Reminder For</InputLabel>
+                  <Select
+                    value={eventFormData.reminder_for}
+                    onChange={(e) => handleEventFormChange('reminder_for', e.target.value)}
+                    label="Reminder For"
+                  >
+                    <MenuItem value="Zoroastrian">Zoroastrian</MenuItem>
+                    <MenuItem value="Gregorian">Gregorian</MenuItem>
+                    <MenuItem value="Both">Both</MenuItem>
+                  </Select>
+                </FormControl>
+              </>
+            )}
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 3, pt: 0 }}>
             <Button 

@@ -15,8 +15,15 @@ const createEvent = [
     .withMessage('Event name must be between 2 and 50 characters'),
   
   body('category')
-    .isIn(['Birthday', 'Anniversary', 'Other'])
-    .withMessage('Category must be Birthday, Anniversary, or Other'),
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Category must be between 2 and 50 characters'),
+  
+  body('customCategory')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 50 })
+    .withMessage('Custom category must be between 5 and 50 characters'),
   
   body('eventDate')
     .isISO8601()
@@ -51,7 +58,22 @@ const createEvent = [
   body('reminder_days')
     .optional()
     .isIn([0, 1, 3, 7, 30])
-    .withMessage('Reminder days must be 0, 1, 3, 7, or 30')
+    .withMessage('Reminder days must be 0, 1, 3, 7, or 30'),
+
+  body('reminder_time_hour')
+    .optional()
+    .isInt({ min: 1, max: 12 })
+    .withMessage('Reminder time hour must be between 1 and 12'),
+
+  body('reminder_time_ampm')
+    .optional()
+    .isIn(['AM', 'PM'])
+    .withMessage('Reminder time period must be AM or PM'),
+
+  body('reminder_for')
+    .optional()
+    .isIn(['Zoroastrian', 'Gregorian', 'Both'])
+    .withMessage('Reminder for must be Zoroastrian, Gregorian, or Both')
 ];
 
 const getAllEvents = [
@@ -86,8 +108,15 @@ const updateEvent = [
   
   body('category')
     .optional()
-    .isIn(['Birthday', 'Anniversary', 'Other'])
-    .withMessage('Category must be Birthday, Anniversary, or Other'),
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Category must be between 2 and 50 characters'),
+  
+  body('customCategory')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 50 })
+    .withMessage('Custom category must be between 5 and 50 characters'),
   
   body('eventDate')
     .optional()
@@ -125,7 +154,22 @@ const updateEvent = [
   body('reminder_days')
     .optional()
     .isIn([0, 1, 3, 7, 30])
-    .withMessage('Reminder days must be 0, 1, 3, 7, or 30')
+    .withMessage('Reminder days must be 0, 1, 3, 7, or 30'),
+
+  body('reminder_time_hour')
+    .optional()
+    .isInt({ min: 1, max: 12 })
+    .withMessage('Reminder time hour must be between 1 and 12'),
+
+  body('reminder_time_ampm')
+    .optional()
+    .isIn(['AM', 'PM'])
+    .withMessage('Reminder time period must be AM or PM'),
+
+  body('reminder_for')
+    .optional()
+    .isIn(['Zoroastrian', 'Gregorian', 'Both'])
+    .withMessage('Reminder for must be Zoroastrian, Gregorian, or Both')
 ];
 
 // =============================================
@@ -141,15 +185,21 @@ const handleCreateEvent = async (req, res) => {
       return res.status(400).json(errorResponse('Validation errors', errors.array()));
     }
 
-    const { name, category, eventDate, beforeSunrise, reminder_days } = req.body;
+    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_ampm, reminder_for } = req.body;
+
+    // Use custom category if provided and category is "Other"
+    const finalCategory = (category === 'Other' && customCategory) ? customCategory : category;
 
     // Create new event
     const event = new Event({
       name,
-      category,
+      category: finalCategory,
       eventDate: new Date(eventDate),
       beforeSunrise,
       reminder_days: reminder_days || 0,
+      reminder_time_hour: reminder_time_hour || 12,
+      reminder_time_ampm: reminder_time_ampm || 'PM',
+      reminder_for: reminder_for || 'Zoroastrian',
       createdBy: req.user.userId
     });
 
@@ -307,13 +357,20 @@ const handleUpdateEvent = async (req, res) => {
     }
 
     // Update fields
-    const { name, category, eventDate, beforeSunrise, reminder_days } = req.body;
+    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_ampm, reminder_for } = req.body;
     
     if (name !== undefined) event.name = name;
-    if (category !== undefined) event.category = category;
+    if (category !== undefined) {
+      // Use custom category if provided and category is "Other"
+      const finalCategory = (category === 'Other' && customCategory) ? customCategory : category;
+      event.category = finalCategory;
+    }
     if (eventDate !== undefined) event.eventDate = new Date(eventDate);
     if (beforeSunrise !== undefined) event.beforeSunrise = beforeSunrise;
     if (reminder_days !== undefined) event.reminder_days = reminder_days;
+    if (reminder_time_hour !== undefined) event.reminder_time_hour = reminder_time_hour;
+    if (reminder_time_ampm !== undefined) event.reminder_time_ampm = reminder_time_ampm;
+    if (reminder_for !== undefined) event.reminder_for = reminder_for;
 
     await event.save();
 

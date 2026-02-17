@@ -96,11 +96,11 @@ const ZoroastrianEventTable = (props) => {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <FormControl size="medium" sx={{ minWidth: isMobile ? 150 : 180 }}>
-              <InputLabel>Event Type</InputLabel>
+            <FormControl size="medium" sx={{ width: 150 }}>
+              <InputLabel>List Type</InputLabel>
               <Select
                 value={viewType}
-                label="Event Type"
+                label="List Type"
                 onChange={onViewTypeChange}
               >
                 <MenuItem value="gregorian">Gregorian</MenuItem>
@@ -260,8 +260,8 @@ const ZoroastrianEventTable = (props) => {
                 <TableCell className="data-column">Name</TableCell>
                 <TableCell className="data-column">Category</TableCell>
                 <TableCell className="data-column">Date</TableCell>
-                <TableCell className="data-column">Roj</TableCell>
-                <TableCell className="data-column">Mah</TableCell>
+                <TableCell className="data-column">Roj (Day)</TableCell>
+                <TableCell className="data-column">Mah (Month)</TableCell>
                 <TableCell className="data-column">Falls On</TableCell>
                 <TableCell className="data-column">Days Remaining</TableCell>
                 <TableCell className="action-column"></TableCell>

@@ -45,6 +45,13 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Default Zoroastrian calendar is required'],
     enum: ['Shenshai', 'Kadmi', 'Fasli'],
     default: 'Shenshai'
+  },
+
+  // User timezone for reminder scheduling
+  timezone: {
+    type: String,
+    required: [true, 'Timezone is required'],
+    default: 'Asia/Kolkata'
   }
   
 }, {

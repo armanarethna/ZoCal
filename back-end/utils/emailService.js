@@ -49,8 +49,49 @@ class EmailService {
     return this.isInitialized;
   }
 
-  // Send reminder email for a Zoroastrian event
-  async sendReminderEmail(event, user, daysUntilEvent) {
+  // Generate calendar invite (ICS format)
+  generateCalendarInvite(event, eventDate, description) {
+    const now = new Date();
+    const eventStartDateTime = new Date(eventDate);
+    eventStartDateTime.setHours(9, 0, 0, 0); // Set to 9 AM
+    
+    const eventEndDateTime = new Date(eventStartDateTime);
+    eventEndDateTime.setHours(10, 0, 0, 0); // Set to 10 AM (1 hour duration)
+    
+    // Format dates for ICS
+    const formatICSDate = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//ZoCal//ZoCal Event Reminder//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:${event._id}@zocal.app`,
+      `DTSTART:${formatICSDate(eventStartDateTime)}`,
+      `DTEND:${formatICSDate(eventEndDateTime)}`,
+      `DTSTAMP:${formatICSDate(now)}`,
+      `SUMMARY:${event.name} ZoCal`,
+      `DESCRIPTION:${description.replace(/\n/g, '\\n').replace(/,/g, '\\,')}`,
+      'STATUS:CONFIRMED',
+      'TRANSP:OPAQUE',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT15M',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Reminder',
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    
+    return icsContent;
+  }
+
+  // Send reminder email for a Zoroastrian event with calendar invite
+  async sendZoroastrianReminderEmail(event, user, daysUntilEvent) {
     try {
       // Ensure email service is initialized
       const initialized = await this.ensureInitialized();
@@ -59,27 +100,111 @@ class EmailService {
         throw new Error('Email service not properly initialized');
       }
 
-      // Use Zoroastrian calendar calculations - get next occurrence based on Zoroastrian calendar
+      // Use Zoroastrian calendar calculations
       const nextOccurrence = calculateNextGregorianDate(event, user.default_zoro_cal);
       const zoroastrianDateInfo = this.getZoroastrianDateInfo(event, user.default_zoro_cal);
       
-      const emailContent = this.generateReminderEmailContent(event, user, daysUntilEvent, nextOccurrence, zoroastrianDateInfo);
+      const emailContent = this.generateZoroastrianReminderEmailContent(event, user, daysUntilEvent, nextOccurrence, zoroastrianDateInfo);
+      
+      // Generate calendar invite description
+      const calendarDescription = `Event Name: ${event.name}\nCategory: ${event.category}\nOriginal Gregorian Date: ${event.eventDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\nCalendar Type: ${user.default_zoro_cal}\nZoroastrian Date: ${zoroastrianDateInfo.isGatha ? `Gatha: ${zoroastrianDateInfo.gatha}` : `Roj: ${zoroastrianDateInfo.roj}, Mah: ${zoroastrianDateInfo.mah}`}\nFalls On: ${nextOccurrence.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\nThis reminder was sent from ZoCal - Your Zoroastrian Calendar App`;
+      
+      const calendarInvite = this.generateCalendarInvite(event, nextOccurrence, calendarDescription);
 
       const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: user.email,
-        subject: `ZoCal Reminder: ${event.name} is in ${daysUntilEvent} ${daysUntilEvent === 1 ? 'day' : 'days'}`,
-        html: emailContent
+        subject: `ZoCal Zoroastrian Reminder: ${event.name} is in ${daysUntilEvent} ${daysUntilEvent === 1 ? 'day' : 'days'}`,
+        html: emailContent,
+        icalEvent: {
+          content: calendarInvite,
+          method: 'PUBLISH'
+        },
+        attachments: [{
+          filename: `${event.name}_ZoCal.ics`,
+          content: calendarInvite,
+          contentType: 'text/calendar; charset=utf-8',
+          contentDisposition: 'attachment'
+        }]
       };
 
       const result = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Reminder email sent for event ${event.name} to ${user.email}`);
+      console.log(`✅ Zoroastrian reminder email with calendar invite sent for event ${event.name} to ${user.email}`);
       return result;
 
     } catch (error) {
-      console.error(`❌ Failed to send reminder email for event ${event.name}:`, error.message);
+      console.error(`❌ Failed to send Zoroastrian reminder email for event ${event.name}:`, error.message);
       throw error;
     }
+  }
+
+  // Send reminder email for a Gregorian event with calendar invite
+  async sendGregorianReminderEmail(event, user, daysUntilEvent) {
+    try {
+      // Ensure email service is initialized
+      const initialized = await this.ensureInitialized();
+      
+      if (!initialized || !this.transporter) {
+        throw new Error('Email service not properly initialized');
+      }
+
+      // Calculate next Gregorian occurrence 
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const eventDate = new Date(event.eventDate);
+      const currentYear = today.getFullYear();
+      
+      // Create this year's occurrence
+      const thisYearEvent = new Date(currentYear, eventDate.getMonth(), eventDate.getDate());
+      thisYearEvent.setHours(0, 0, 0, 0);
+      
+      let nextGregorianOccurrence;
+      if (thisYearEvent >= today) {
+        nextGregorianOccurrence = thisYearEvent;
+      } else {
+        // Next year's occurrence
+        nextGregorianOccurrence = new Date(currentYear + 1, eventDate.getMonth(), eventDate.getDate());
+        nextGregorianOccurrence.setHours(0, 0, 0, 0);
+      }
+      
+      const emailContent = this.generateGregorianReminderEmailContent(event, user, daysUntilEvent, nextGregorianOccurrence);
+      
+      // Generate calendar invite description
+      const calendarDescription = `Event Name: ${event.name}\nCategory: ${event.category}\nOriginal Gregorian Date: ${event.eventDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\nFalls On: ${nextGregorianOccurrence.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\nThis reminder was sent from ZoCal - Your Zoroastrian Calendar App`;
+      
+      const calendarInvite = this.generateCalendarInvite(event, nextGregorianOccurrence, calendarDescription);
+
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: user.email,
+        subject: `ZoCal Gregorian Reminder: ${event.name} is in ${daysUntilEvent} ${daysUntilEvent === 1 ? 'day' : 'days'}`,
+        html: emailContent,
+        icalEvent: {
+          content: calendarInvite,
+          method: 'PUBLISH'
+        },
+        attachments: [{
+          filename: `${event.name}_ZoCal.ics`,
+          content: calendarInvite,
+          contentType: 'text/calendar; charset=utf-8',
+          contentDisposition: 'attachment'
+        }]
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(`✅ Gregorian reminder email with calendar invite sent for event ${event.name} to ${user.email}`);
+      return result;
+
+    } catch (error) {
+      console.error(`❌ Failed to send Gregorian reminder email for event ${event.name}:`, error.message);
+      throw error;
+    }
+  }
+
+  // Keep original method for backward compatibility
+  async sendReminderEmail(event, user, daysUntilEvent) {
+    return await this.sendZoroastrianReminderEmail(event, user, daysUntilEvent);
   }
 
   // Get Zoroastrian date information based on calendar type
@@ -104,8 +229,8 @@ class EmailService {
     }
   }
 
-  // Generate HTML email content for reminder
-  generateReminderEmailContent(event, user, daysUntilEvent, nextOccurrence, zoroDateInfo) {
+  // Generate HTML email content for Zoroastrian reminder
+  generateZoroastrianReminderEmailContent(event, user, daysUntilEvent, nextOccurrence, zoroDateInfo) {
     const gregorianDate = event.eventDate.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -155,7 +280,7 @@ class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>🗓️ ZoCal Event Reminder</h1>
+          <h1>🗓️ ZoCal Zoroastrian Event Reminder</h1>
         </div>
         
         <div class="content">
@@ -196,7 +321,7 @@ class EmailService {
             <h2>Event is in ${daysUntilEvent} ${daysUntilEvent === 1 ? 'day' : 'days'}! 📅</h2>
           </div>
           
-          <p class="closing-text">Make sure to mark your calendar and prepare for this special occasion.</p>
+          <p class="closing-text">Make sure to mark your calendar and prepare for this special occasion. A calendar invite has been included with this email.</p>
           
           <div class="footer">
             <p><strong>This reminder was sent from ZoCal - Your Zoroastrian Calendar App</strong></p>
@@ -206,6 +331,99 @@ class EmailService {
       </body>
       </html>
     `;
+  }
+
+  // Generate HTML email content for Gregorian reminder
+  generateGregorianReminderEmailContent(event, user, daysUntilEvent, nextGregorianOccurrence) {
+    const gregorianDate = event.eventDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const fallsOnDate = nextGregorianOccurrence.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; font-size: 16px; }
+          .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 10px 10px 0 0; text-align: center; }
+          .header h1 { margin: 0; font-size: 28px; }
+          .content { background: #f8f9fa; padding: 35px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef; font-size: 18px; }
+          .event-details { background: white; padding: 25px; border-radius: 10px; margin: 25px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+          
+          .details-table { width: 100%; border-collapse: collapse; }
+          .details-table td { padding: 12px; border-bottom: 2px solid #f0f0f0; vertical-align: top; }
+          .details-table tr:last-child td { border-bottom: none; }
+          .detail-label { font-weight: bold; color: #555; width: 40%; font-size: 16px; }
+          .detail-value { color: #333; width: 60%; font-size: 18px; font-weight: 500; }
+          
+          .countdown { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 10px; text-align: center; margin: 25px 0; border-left: 5px solid #3b82f6; }
+          .countdown h2 { margin: 0; color: #1e40af; font-size: 24px; }
+          .footer { text-align: center; margin-top: 35px; color: #666; font-size: 15px; line-height: 1.5; }
+          .intro-text { font-size: 18px; margin: 20px 0; }
+          .closing-text { font-size: 17px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>📅 ZoCal Gregorian Event Reminder</h1>
+        </div>
+        
+        <div class="content">
+          <p class="intro-text">Dear <strong>${user.name}</strong>,</p>
+          
+          <p class="intro-text">This is a friendly reminder about your upcoming Gregorian event:</p>
+          
+          <div class="event-details">
+            <table class="details-table">
+              <tr>
+                <td class="detail-label">Event Name:</td>
+                <td class="detail-value">${event.name}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Category:</td>
+                <td class="detail-value">${event.category}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Original Gregorian Date:</td>
+                <td class="detail-value">${gregorianDate}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Falls On:</td>
+                <td class="detail-value">${fallsOnDate}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="countdown">
+            <h2>Event is in ${daysUntilEvent} ${daysUntilEvent === 1 ? 'day' : 'days'}! 📅</h2>
+          </div>
+          
+          <p class="closing-text">Make sure to mark your calendar and prepare for this special occasion. A calendar invite has been included with this email.</p>
+          
+          <div class="footer">
+            <p><strong>This reminder was sent from ZoCal - Your Zoroastrian Calendar App</strong></p>
+            <p style="font-size: 13px; color: #999; margin-top: 10px;">To update your notification preferences, please log into your ZoCal account.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Keep original method for backward compatibility
+  generateReminderEmailContent(event, user, daysUntilEvent, nextOccurrence, zoroDateInfo) {
+    return this.generateZoroastrianReminderEmailContent(event, user, daysUntilEvent, nextOccurrence, zoroDateInfo);
   }
 
   // Test email configuration

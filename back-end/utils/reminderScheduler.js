@@ -3,6 +3,7 @@ const Event = require('../models/Event');
 const User = require('../models/User');
 const emailService = require('./emailService');
 const { calculateZoroastrianDaysRemaining } = require('./zoroastrianUtils');
+const { calculateNextGregorianDate } = require('./zoroastrianUtils');
 
 // =============================================
 // ZOROASTRIAN EVENT REMINDER SCHEDULER
@@ -15,16 +16,16 @@ class ReminderScheduler {
     console.log('📅 ReminderScheduler initialized');
   }
 
-  // Start the scheduler - runs daily at 12:00 PM
+  // Start the scheduler - runs every hour
   start() {
     if (this.isRunning) {
       console.log('⚠️ Reminder scheduler is already running');
       return;
     }
 
-    // Schedule to run every day at 12:00 PM (0 12 * * *)
-    this.scheduledJob = cron.schedule('0 12 * * *', async () => {
-      console.log('🔄 Running daily reminder check at 12:00 PM...');
+    // Schedule to run every hour (0 * * * *)
+    this.scheduledJob = cron.schedule('0 * * * *', async () => {
+      console.log('🔄 Running hourly reminder check...');
       await this.checkAndSendReminders();
     }, {
       scheduled: false,
@@ -33,7 +34,7 @@ class ReminderScheduler {
 
     this.scheduledJob.start();
     this.isRunning = true;
-    console.log('✅ Reminder scheduler started - will run daily at 12:00 PM');
+    console.log('✅ Reminder scheduler started - will run every hour');
   }
 
   // Stop the scheduler
@@ -43,6 +44,53 @@ class ReminderScheduler {
       this.isRunning = false;
       console.log('⏹️ Reminder scheduler stopped');
     }
+  }
+
+  // Check if current time matches user's preferred reminder time
+  isReminderTime(event, user) {
+    const now = new Date();
+    const userTimezone = user.timezone || 'Asia/Kolkata';
+    
+    // Get current time in user's timezone
+    const userTime = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
+    const currentHour = userTime.getHours();
+    
+    // Convert reminder time to 24-hour format
+    let reminderHour = event.reminder_time_hour;
+    if (event.reminder_time_ampm === 'PM' && reminderHour !== 12) {
+      reminderHour += 12;
+    } else if (event.reminder_time_ampm === 'AM' && reminderHour === 12) {
+      reminderHour = 0;
+    }
+    
+    return currentHour === reminderHour;
+  }
+
+  // Calculate days remaining for Gregorian calendar
+  calculateGregorianDaysRemaining(event) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const eventDate = new Date(event.eventDate);
+    const currentYear = today.getFullYear();
+    
+    // Create this year's occurrence
+    const thisYearEvent = new Date(currentYear, eventDate.getMonth(), eventDate.getDate());
+    thisYearEvent.setHours(0, 0, 0, 0);
+    
+    let nextOccurrence;
+    if (thisYearEvent >= today) {
+      nextOccurrence = thisYearEvent;
+    } else {
+      // Next year's occurrence
+      nextOccurrence = new Date(currentYear + 1, eventDate.getMonth(), eventDate.getDate());
+      nextOccurrence.setHours(0, 0, 0, 0);
+    }
+    
+    const diffTime = nextOccurrence - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
   }
 
   // Check for events that need reminders and send them
@@ -61,15 +109,42 @@ class ReminderScheduler {
       for (const event of eventsWithReminders) {
         try {
           const user = event.createdBy;
-          const daysUntilEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
           
-          // Check if we should send a reminder today (use Zoroastrian calendar logic)
-          if (daysUntilEvent === event.reminder_days) {
-            await emailService.sendReminderEmail(event, user, daysUntilEvent);
-            remindersSent++;
-          } else {
+          // Check if it's the right time to send reminder for this user
+          if (!this.isReminderTime(event, user)) {
             remindersSkipped++;
-            console.log(`⏭️ Event "${event.name}": ${daysUntilEvent} days remaining (reminder set for ${event.reminder_days} days)`);
+            continue;
+          }
+
+          // Calculate days remaining based on reminder_for setting
+          if (event.reminder_for === 'Zoroastrian') {
+            const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
+            if (daysUntilZoroEvent === event.reminder_days) {
+              await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
+              remindersSent++;
+            }
+          } else if (event.reminder_for === 'Gregorian') {
+            const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
+            if (daysUntilGregorianEvent === event.reminder_days) {
+              await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
+              remindersSent++;
+            }
+          } else if (event.reminder_for === 'Both') {
+            const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
+            const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
+            
+            let sent = false;
+            if (daysUntilZoroEvent === event.reminder_days) {
+              await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
+              sent = true;
+            }
+            if (daysUntilGregorianEvent === event.reminder_days) {
+              await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
+              sent = true;
+            }
+            if (sent) {
+              remindersSent++;
+            }
           }
           
         } catch (error) {
@@ -77,7 +152,9 @@ class ReminderScheduler {
         }
       }
 
-      console.log(`✅ Reminder check complete: ${remindersSent} sent, ${remindersSkipped} skipped`);
+      if (remindersSent > 0 || remindersSkipped > 0) {
+        console.log(`✅ Reminder check complete: ${remindersSent} sent, ${remindersSkipped} skipped`);
+      }
       
     } catch (error) {
       console.error('❌ Error during reminder check:', error.message);
@@ -92,17 +169,35 @@ class ReminderScheduler {
         return false;
       }
 
-      const daysUntilEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
-      
-      // If current days to event is less than or equal to reminder_days, send email now
-      if (daysUntilEvent <= event.reminder_days && daysUntilEvent >= 0) {
-        console.log(`📧 Sending immediate reminder for event "${event.name}" - ${daysUntilEvent} days remaining (Zoroastrian calendar)`);
-        await emailService.sendReminderEmail(event, user, daysUntilEvent);
-        return true;
+      let sentReminder = false;
+
+      if (event.reminder_for === 'Zoroastrian' || event.reminder_for === 'Both') {
+        const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
+        
+        // If current days to event is less than or equal to reminder_days, send email now
+        if (daysUntilZoroEvent <= event.reminder_days && daysUntilZoroEvent >= 0) {
+          console.log(`📧 Sending immediate Zoroastrian reminder for event "${event.name}" - ${daysUntilZoroEvent} days remaining`);
+          await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
+          sentReminder = true;
+        }
       }
 
-      console.log(`ℹ️ Event "${event.name}": ${daysUntilEvent} days until Zoroastrian occurrence (reminder set for ${event.reminder_days} days)`);
-      return false;
+      if (event.reminder_for === 'Gregorian' || event.reminder_for === 'Both') {
+        const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
+        
+        // If current days to event is less than or equal to reminder_days, send email now
+        if (daysUntilGregorianEvent <= event.reminder_days && daysUntilGregorianEvent >= 0) {
+          console.log(`📧 Sending immediate Gregorian reminder for event "${event.name}" - ${daysUntilGregorianEvent} days remaining`);
+          await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
+          sentReminder = true;
+        }
+      }
+
+      if (!sentReminder) {
+        console.log(`ℹ️ Event "${event.name}": Not yet time for immediate reminder`);
+      }
+
+      return sentReminder;
       
     } catch (error) {
       console.error(`❌ Failed to send immediate reminder for event ${event.name}:`, error.message);
@@ -143,16 +238,19 @@ class ReminderScheduler {
 
       const upcomingReminders = eventsWithReminders.map(event => {
         const user = event.createdBy;
-        const daysUntilEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
-        const willSendReminder = daysUntilEvent === event.reminder_days;
+        const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
+        const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
         
         return {
           eventName: event.name,
           eventDate: event.eventDate,
           reminderDays: event.reminder_days,
-          daysUntilZoroEvent: daysUntilEvent,
-          willSendToday: willSendReminder,
+          reminderFor: event.reminder_for,
+          daysUntilZoroEvent: daysUntilZoroEvent,
+          daysUntilGregorianEvent: daysUntilGregorianEvent,
+          reminderTime: `${event.reminder_time_hour} ${event.reminder_time_ampm}`,
           userEmail: user.email,
+          userTimezone: user.timezone,
           calendarType: user.default_zoro_cal
         };
       });

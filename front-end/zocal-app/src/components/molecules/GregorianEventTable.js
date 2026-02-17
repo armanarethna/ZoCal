@@ -69,11 +69,11 @@ const GregorianEventTable = ({
         borderColor: 'var(--divider)',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <FormControl size="medium" sx={{ minWidth: 150 }}>
-            <InputLabel>Event Type</InputLabel>
+          <FormControl size="medium" sx={{ width: 150 }}>
+            <InputLabel>List Type</InputLabel>
             <Select
               value={viewType}
-              label="Event Type"
+              label="List Type"
               onChange={onViewTypeChange}
             >
               <MenuItem value="gregorian">Gregorian</MenuItem>
