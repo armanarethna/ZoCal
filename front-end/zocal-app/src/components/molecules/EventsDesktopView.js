@@ -84,7 +84,10 @@ const EventsDesktopView = ({
             <TableCell className="date-column">
               <span style={{ color: 'var(--color-white)' }}>Date</span>
             </TableCell>
-            <TableCell className="details-column" colSpan={2}>{getCalendarTypeDisplayName()} Details</TableCell>
+            <TableCell className="details-column">{getCalendarTypeDisplayName()} Details</TableCell>
+            <TableCell className="fallson-column">
+              <span style={{ color: 'var(--color-white)' }}>Falls On</span>
+            </TableCell>
             <TableCell className="action-column"></TableCell>
             <TableCell className="action-column"></TableCell>
           </TableRow>

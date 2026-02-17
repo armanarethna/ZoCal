@@ -31,7 +31,7 @@ import {
   calendarTypes,
   sortEventsByZoroastrianOccurrence
 } from '../../utils/zoroastrianCalendar';
-import { ZOROASTRIAN_CALENDAR_TYPES } from '../../constants';
+import { ZOROASTRIAN_CALENDAR_TYPES, TOOLTIP_TEXT } from '../../constants';
 
 const ZoroastrianEventTable = (props) => {
   const { 
@@ -103,7 +103,7 @@ const ZoroastrianEventTable = (props) => {
               Events
             </Typography>
             <Tooltip 
-              title="The Events tab displays your saved events including calculated Zoroastrian calendar details. Events are sorted by their next occurrence date for Zoroastrian event date. Calendar type determines which Zoroastrian calendar system is used."
+              title={TOOLTIP_TEXT.EVENTS_TAB}
               arrow
               placement="top"
               open={isMobile ? tooltipOpen : undefined}

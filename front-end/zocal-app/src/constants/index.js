@@ -121,6 +121,21 @@ export const VALIDATION_MESSAGES = {
 };
 
 // =============================================
+// TOOLTIP CONSTANTS
+// =============================================
+
+// Tooltip text for various components
+export const TOOLTIP_TEXT = {
+  ROJ_CALCULATOR: `Convert Gregorian dates to the Zoroastrian calendar system. 
+    The calculator determines the Roj (day name) and Mah (month name) according to the selected calendar type. 
+    Use 'Before sunrise' option if the time is before sunrise on the selected date, as Zoroastrian days begin at sunrise.`,
+  EVENTS_TAB: `The Events tab displays your saved events including calculated Zoroastrian calendar details. 
+    Events are sorted by their next occurrence date for Zoroastrian event date. 
+    Calendar type determines which Zoroastrian calendar system is used. 
+    Roj (day name) and Mah (month name) are determined based on the event date and selected calendar type.`
+};
+
+// =============================================
 // APP CONFIGURATION
 // =============================================
 

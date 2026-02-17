@@ -28,7 +28,7 @@ import {
   setRojResult,
   setRojIsValidDate
 } from '../../store/calendarSlice';
-import { ZOROASTRIAN_CALENDAR_TYPES } from '../../constants';
+import { ZOROASTRIAN_CALENDAR_TYPES, TOOLTIP_TEXT } from '../../constants';
 
 const RojCalculatorTab = () => {
   const dispatch = useDispatch();
@@ -132,7 +132,7 @@ const RojCalculatorTab = () => {
               Zoroastrian Roj Calculator
             </Typography>
             <Tooltip 
-              title="Convert Gregorian dates to the Zoroastrian calendar system. The calculator determines the Roj (day name) and Mah (month name) according to the selected calendar type. Use 'Before sunrise' option if the time is before sunrise on the selected date, as Zoroastrian days begin at sunrise."
+              title={TOOLTIP_TEXT.ROJ_CALCULATOR}
               arrow
               placement="top"
               open={isMobile ? tooltipOpen : undefined}
