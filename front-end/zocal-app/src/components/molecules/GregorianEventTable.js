@@ -60,13 +60,13 @@ const GregorianEventTable = ({
       {/* Sticky Header */}
       <Box sx={{ 
         position: 'sticky', 
-        top: isMobile ? 144 : 144, 
-        zIndex: 1100, 
+        top: isMobile ? 96 : 128, 
+        zIndex: 1200, 
         backgroundColor: 'var(--background-default)',
-        pt: 0,
-        pb: 1,
+        pt: 2,
+        pb: 2,
         borderBottom: 1,
-        borderColor: 'divider'
+        borderColor: 'var(--divider)',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <FormControl size="medium" sx={{ minWidth: 150 }}>

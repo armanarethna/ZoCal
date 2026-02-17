@@ -86,13 +86,13 @@ const ZoroastrianEventTable = (props) => {
       {/* Sticky Header */}
       <Box sx={{ 
         position: 'sticky', 
-        top: isMobile ? 144 : 192, 
-        zIndex: 1100, 
+        top: isMobile ? 96 : 128, 
+        zIndex: 1200, 
         backgroundColor: 'var(--background-default)',
-        pt: 0,
+        pt: 2,
         pb: 2,
         borderBottom: 1,
-        borderColor: 'var(--divider)'
+        borderColor: 'var(--divider)',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -108,10 +108,10 @@ const ZoroastrianEventTable = (props) => {
               </Select>
             </FormControl>
             <FormControl sx={{ minWidth: isMobile ? 120 : 180 }}>
-              <InputLabel>Calendar</InputLabel>
+              <InputLabel>Calendar Type</InputLabel>
               <Select
                 value={calendarType}
-                label="Calendar"
+                label="Calendar Type"
                 onChange={(e) => setCalendarType(e.target.value)}
               >
                 {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (

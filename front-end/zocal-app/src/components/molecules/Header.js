@@ -38,7 +38,7 @@ const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) 
     setSettingsModalOpen(false);
   };
   return (
-    <AppBar position="sticky" color="default" elevation={1} sx={{ zIndex: 1300 }}>
+    <AppBar position="sticky" color="default" elevation={1} sx={{ zIndex: 1400 }}>
       <Toolbar sx={{ minHeight: isMobile ? '48px' : '64px' }}>
         <Typography 
           variant="h6" 

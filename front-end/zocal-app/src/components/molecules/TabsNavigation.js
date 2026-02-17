@@ -68,7 +68,7 @@ const TabsNavigation = ({ tabValue, handleTabChange }) => {
       <Box sx={{ 
         position: 'sticky', 
         top: isMobile ? 48 : 64, 
-        zIndex: 1200, 
+        zIndex: 1300, 
         backgroundColor: 'var(--background-paper)',
         borderTop: 1,
         borderBottom: 1,
