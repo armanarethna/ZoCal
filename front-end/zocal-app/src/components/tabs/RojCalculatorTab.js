@@ -114,6 +114,17 @@ const RojCalculatorTab = () => {
     }
   };
 
+  const formatResultMobile = () => {
+    if (!isValidDate) return ['Invalid Date Input'];
+    if (!result) return [''];
+    
+    if (result.isGatha) {
+      return [`${result.roj} (Gatha)`];
+    } else {
+      return [`${result.roj} (Roj)`, `${result.mah} (Mah)`];
+    }
+  };
+
   return (
     <Container maxWidth="md">
       <Card sx={{ 
@@ -204,19 +215,37 @@ const RojCalculatorTab = () => {
               p: 2,
               mx: -1
             }}>
-              <Typography 
-                variant="h5" 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  color: !isValidDate ? 'error.main' : 'primary.contrastText',
-                  minHeight: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                {formatResult()}
-              </Typography>
+              {isMobile ? (
+                <Box sx={{ minHeight: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
+                  {formatResultMobile().map((line, index) => (
+                    <Typography 
+                      key={index}
+                      variant="h6" 
+                      sx={{ 
+                        fontWeight: 'bold', 
+                        color: !isValidDate ? 'error.main' : 'primary.contrastText',
+                        lineHeight: 1.2
+                      }}
+                    >
+                      {line}
+                    </Typography>
+                  ))}
+                </Box>
+              ) : (
+                <Typography 
+                  variant="h5" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    color: !isValidDate ? 'error.main' : 'primary.contrastText',
+                    minHeight: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {formatResult()}
+                </Typography>
+              )}
             </Box>
           </CardContent>
         </Card>
