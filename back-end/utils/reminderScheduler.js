@@ -119,13 +119,15 @@ class ReminderScheduler {
           // Calculate days remaining based on reminder_for setting
           if (event.reminder_for === 'Zoroastrian') {
             const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
-            if (daysUntilZoroEvent === event.reminder_days) {
+            // Send reminder if it's the exact reminder day OR if event is today
+            if (daysUntilZoroEvent === event.reminder_days || (daysUntilZoroEvent === 0 && event.reminder_days > 0)) {
               await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
               remindersSent++;
             }
           } else if (event.reminder_for === 'Gregorian') {
             const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
-            if (daysUntilGregorianEvent === event.reminder_days) {
+            // Send reminder if it's the exact reminder day OR if event is today
+            if (daysUntilGregorianEvent === event.reminder_days || (daysUntilGregorianEvent === 0 && event.reminder_days > 0)) {
               await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
               remindersSent++;
             }
@@ -134,11 +136,13 @@ class ReminderScheduler {
             const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
             
             let sent = false;
-            if (daysUntilZoroEvent === event.reminder_days) {
+            // Send Zoroastrian reminder if it's the exact reminder day OR if event is today
+            if (daysUntilZoroEvent === event.reminder_days || (daysUntilZoroEvent === 0 && event.reminder_days > 0)) {
               await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
               sent = true;
             }
-            if (daysUntilGregorianEvent === event.reminder_days) {
+            // Send Gregorian reminder if it's the exact reminder day OR if event is today
+            if (daysUntilGregorianEvent === event.reminder_days || (daysUntilGregorianEvent === 0 && event.reminder_days > 0)) {
               await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
               sent = true;
             }
