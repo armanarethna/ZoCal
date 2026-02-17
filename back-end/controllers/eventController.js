@@ -22,8 +22,14 @@ const createEvent = [
   body('customCategory')
     .optional()
     .trim()
-    .isLength({ min: 5, max: 50 })
-    .withMessage('Custom category must be between 5 and 50 characters'),
+    .custom((value) => {
+      if (value && value.length > 0) {
+        if (value.length < 5 || value.length > 50) {
+          throw new Error('Custom category must be between 5 and 50 characters');
+        }
+      }
+      return true;
+    }),
   
   body('eventDate')
     .isISO8601()
@@ -115,8 +121,14 @@ const updateEvent = [
   body('customCategory')
     .optional()
     .trim()
-    .isLength({ min: 5, max: 50 })
-    .withMessage('Custom category must be between 5 and 50 characters'),
+    .custom((value) => {
+      if (value && value.length > 0) {
+        if (value.length < 5 || value.length > 50) {
+          throw new Error('Custom category must be between 5 and 50 characters');
+        }
+      }
+      return true;
+    }),
   
   body('eventDate')
     .optional()
