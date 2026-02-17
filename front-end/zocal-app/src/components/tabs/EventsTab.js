@@ -7,24 +7,16 @@ import {
   Container,
 } from '@mui/material';
 import { 
-  EventNote as EventIcon
+  Event as EventIcon
 } from '@mui/icons-material';
-
-// Components
 import EventModal from '../modals/EventModal';
-import GregorianEventTable from '../molecules/GregorianEventTable';
 import ZoroastrianEventTable from '../molecules/ZoroastrianEventTable';
-
-// Redux actions
 import { getAllEvents } from '../../store/eventsSlice';
 
 const EventsTab = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector(state => state.auth);
   const { events = [], loading: eventsLoading, error: eventsError } = useSelector(state => state.events);
-
-  // Table view state
-  const [viewType, setViewType] = useState('gregorian');
 
   // Event modal states
   const [eventModalOpen, setEventModalOpen] = useState(false);
@@ -40,11 +32,6 @@ const EventsTab = () => {
       dispatch(getAllEvents());
     }
   }, [dispatch, isAuthenticated, user]);
-
-  // Handle view type change
-  const handleViewTypeChange = (event) => {
-    setViewType(event.target.value);
-  };
 
   // Handle opening event modal for adding
   const handleAddEvent = () => {
@@ -76,12 +63,9 @@ const EventsTab = () => {
     setEventToDelete(null);
   };
 
-
-
   return (
     <Box sx={{ pb: 3 }}>
       {!isAuthenticated ? (
-        // Show message box when not authenticated
         <Container maxWidth="sm">
           <Paper 
             sx={{ 
@@ -100,43 +84,34 @@ const EventsTab = () => {
               }} 
             />
             <Typography variant="h6" gutterBottom>
-              Event Management
+              Events
             </Typography>
-            <Typography variant="body1" sx={{ color: 'var(--text-secondary)' }}>
-              Sign Up / Log In to save and view Gregorian and Zoroastrian events
+            <Typography variant="body1" sx={{ color: 'var(--text-secondary)', mt: 2, mb:1 , fontWeight: 'bold' }}>
+              Log In or Sign Up to:
             </Typography>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body1" sx={{ color: 'var(--text-secondary)', mb: 0.5 }}>
+                Save and manage your events
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'var(--text-secondary)', mb: 0.5 }}>
+                View Zoroastrian events details
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'var(--text-secondary)' }}>
+                Setup event reminders
+              </Typography>
+            </Box>
           </Paper>
         </Container>
       ) : (
-        <>
-          {/* Render appropriate table based on view type */}
-          {viewType === 'gregorian' ? (
-            <GregorianEventTable
-              events={events}
-              loading={eventsLoading}
-              error={eventsError}
-              onEditEvent={handleEditEvent}
-              onDeleteEvent={handleDeleteClick}
-              onAddEvent={handleAddEvent}
-              viewType={viewType}
-              onViewTypeChange={handleViewTypeChange}
-            />
-          ) : (
-            <ZoroastrianEventTable
-              events={events}
-              loading={eventsLoading}
-              error={eventsError}
-              onEditEvent={handleEditEvent}
-              onDeleteEvent={handleDeleteClick}
-              onAddEvent={handleAddEvent}
-              viewType={viewType}
-              onViewTypeChange={handleViewTypeChange}
-            />
-          )}
-        </>
+        <ZoroastrianEventTable
+          events={events}
+          loading={eventsLoading}
+          error={eventsError}
+          onEditEvent={handleEditEvent}
+          onDeleteEvent={handleDeleteClick}
+          onAddEvent={handleAddEvent}
+        />
       )}
-      
-      {/* Event Modal */}
       <EventModal
         open={eventModalOpen}
         onClose={handleCloseEventModal}

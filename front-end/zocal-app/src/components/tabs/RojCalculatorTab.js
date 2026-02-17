@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Box,
@@ -13,10 +13,12 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
-  Divider,
+  Tooltip,
+  IconButton,
   useMediaQuery,
   useTheme
 } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { gregorianToZoroastrian, calendarTypes } from '../../utils/zoroastrianCalendar';
 import CalendarInfoBox from '../molecules/CalendarInfoBox';
 import { 
@@ -35,6 +37,17 @@ const RojCalculatorTab = () => {
   );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const handleTooltipClick = () => {
+    if (isMobile) {
+      setTooltipOpen(!tooltipOpen);
+    }
+  };
+
+  const handleTooltipClose = () => {
+    setTooltipOpen(false);
+  };
 
   // Helper function to validate if a date string represents a valid date
   const validateDate = (dateString) => {
@@ -97,17 +110,7 @@ const RojCalculatorTab = () => {
     if (result.isGatha) {
       return `${result.roj} (Gatha)`;
     } else {
-      if (isMobile) {
-        return (
-          <>
-            {result.roj} (Roj)
-            <br />
-            {result.mah} (Mah)
-          </>
-        );
-      } else {
-        return `${result.roj} (Roj), ${result.mah} (Mah)`;
-      }
+      return `${result.roj} (Roj), ${result.mah} (Mah)`;
     }
   };
 
@@ -124,76 +127,64 @@ const RojCalculatorTab = () => {
         mt: 2
       }}>
         <CardContent sx={{ p: 2.5, backgroundColor: 'var(--grey-50)' }}>
-          <Typography variant="h6" gutterBottom>
-            Gregorian to Zoroastrian
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Typography variant="h6">
+              Zoroastrian Roj Calculator
+            </Typography>
+            <Tooltip 
+              title="Convert Gregorian dates to the Zoroastrian calendar system. The calculator determines the Roj (day name) and Mah (month name) according to the selected calendar type. Use 'Before sunrise' option if the time is before sunrise on the selected date, as Zoroastrian days begin at sunrise."
+              arrow
+              placement="top"
+              open={isMobile ? tooltipOpen : undefined}
+              onClose={handleTooltipClose}
+              disableHoverListener={isMobile}
+              disableFocusListener={isMobile}
+              disableTouchListener={isMobile}
+            >
+              <IconButton 
+                size="small" 
+                sx={{ color: 'text.secondary' }}
+                onClick={handleTooltipClick}
+              >
+                <InfoIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
             
             <Box sx={{ mt: 2, mb: 2 }}>
-              {isMobile ? (
-                <Box>
-                  {/* Mobile Layout - Dropdowns on separate lines */}
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>Calendar Type</InputLabel>
-                    <Select
-                      value={calendarType}
-                      label="Calendar Type"
-                      onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
-                    >
-                      {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
-                        <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  
-                  {/* Date Input */}
-                  <TextField
-                    fullWidth
-                    type="date"
-                    label="Date"
-                    value={selectedDate}
-                    onChange={(e) => dispatch(setRojSelectedDate(e.target.value))}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    inputProps={{
-                      min: minDate,
-                      max: maxDate
-                    }}
-                    sx={{ mb: 2 }}
-                  />
-                </Box>
-              ) : (
-                /* Desktop Layout - Original Dropdown */
-                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                  <FormControl sx={{ flex: 1 }}>
-                    <InputLabel>Calendar Type</InputLabel>
-                    <Select
-                      value={calendarType}
-                      label="Calendar Type"
-                      onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
-                    >
-                      {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
-                        <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <TextField
-                    sx={{ flex: 1 }}
-                    type="date"
-                    label="Date"
-                    value={selectedDate}
-                    onChange={(e) => dispatch(setRojSelectedDate(e.target.value))}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    inputProps={{
-                      min: minDate,
-                      max: maxDate
-                    }}
-                  />
-                </Box>
-              )}
+              <Box sx={{ display: isMobile ? 'block' : 'flex', gap: isMobile ? 0 : 2, mb: isMobile? 0 : 2 }}>
+                <FormControl 
+                  fullWidth={isMobile}
+                  sx={isMobile ? { mb: 2 } : { flex: 1 }}
+                >
+                  <InputLabel>Calendar Type</InputLabel>
+                  <Select
+                    value={calendarType}
+                    label="Calendar Type"
+                    onChange={(e) => dispatch(setRojCalendarType(e.target.value))}
+                  >
+                    {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
+                      <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <TextField
+                  fullWidth={isMobile}
+                  sx={isMobile ? { mb: 2 } : { flex: 1 }}
+                  type="date"
+                  label="Date"
+                  value={selectedDate}
+                  onChange={(e) => dispatch(setRojSelectedDate(e.target.value))}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{
+                    min: minDate,
+                    max: maxDate
+                  }}
+                />
+              </Box>
 
               <FormControlLabel
                 control={
@@ -203,15 +194,8 @@ const RojCalculatorTab = () => {
                   />
                 }
                 label="Before sunrise"
-                sx={{ mb: 1 }}
               />
             </Box>
-
-            <Divider sx={{ 
-              my: 1.5,
-              borderColor: 'primary.light',
-              borderWidth: 1
-            }} />
 
             <Box sx={{ 
               textAlign: 'center',
@@ -236,11 +220,7 @@ const RojCalculatorTab = () => {
             </Box>
           </CardContent>
         </Card>
-        <Box sx={{ 
-          maxWidth: 600, 
-          mx: 'auto',
-          mt: 2
-        }}>
+        <Box sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
           <CalendarInfoBox calendarType={calendarType} />
         </Box>
       </Container>

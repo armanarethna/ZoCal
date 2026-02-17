@@ -97,20 +97,6 @@ export const formatDisplayDate = (date) => {
 };
 
 /**
- * Sort events by their next occurrence (closest first)
- * @param {Array} events - Array of event objects
- * @param {Date} currentDate - The current date (default: today)
- * @returns {Array} Sorted array of events
- */
-export const sortEventsByNextOccurrence = (events, currentDate = new Date()) => {
-  return events.sort((a, b) => {
-    const nextA = getNextOccurrence(a.eventDate, currentDate);
-    const nextB = getNextOccurrence(b.eventDate, currentDate);
-    return nextA - nextB;
-  });
-};
-
-/**
  * Check if a date is valid and within the allowed range (today and before, up to 100 years ago)
  * @param {Date|string} date - The date to validate
  * @returns {object} Validation result with isValid boolean and error message
