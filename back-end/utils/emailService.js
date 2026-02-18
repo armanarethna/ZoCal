@@ -26,10 +26,9 @@ class EmailService {
       return `https://${process.env.VERCEL_URL}`;
     }
     
-    // Check for production environment
+    // Check for production environment or default to your Vercel app
     if (process.env.NODE_ENV === 'production') {
-      // For production, use your actual domain
-      return process.env.PRODUCTION_FRONTEND_URL || 'https://your-domain.vercel.app';
+      return 'https://zocal.vercel.app';
     }
     
     // Default to localhost for development
