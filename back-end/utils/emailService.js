@@ -14,6 +14,28 @@ class EmailService {
     this.initializationPromise = this.initializeTransporter();
   }
 
+  // Get the correct frontend URL based on environment
+  getFrontendUrl() {
+    // Check for explicit frontend URL first
+    if (process.env.FRONTEND_URL) {
+      return process.env.FRONTEND_URL;
+    }
+    
+    // Check for Vercel deployment
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`;
+    }
+    
+    // Check for production environment
+    if (process.env.NODE_ENV === 'production') {
+      // For production, use your actual domain
+      return process.env.PRODUCTION_FRONTEND_URL || 'https://your-domain.vercel.app';
+    }
+    
+    // Default to localhost for development
+    return 'http://localhost:3000';
+  }
+
   // Initialize email transporter
   async initializeTransporter() {
     try {
@@ -466,7 +488,7 @@ class EmailService {
         throw new Error('Email service not properly initialized');
       }
 
-      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+      const verificationUrl = `${this.getFrontendUrl()}/verify-email?token=${token}`;
       
       const emailContent = `
         <!DOCTYPE html>
@@ -542,7 +564,7 @@ class EmailService {
         throw new Error('Email service not properly initialized');
       }
 
-      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+      const resetUrl = `${this.getFrontendUrl()}/reset-password?token=${token}`;
       
       const emailContent = `
         <!DOCTYPE html>
