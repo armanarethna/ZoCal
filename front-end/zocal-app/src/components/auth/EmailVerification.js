@@ -56,7 +56,7 @@ const EmailVerification = () => {
           // Error handled by Redux state
         });
     }
-  }, [token, verificationSuccess, loading]);
+  }, [token, verificationSuccess, loading, dispatch, navigate]);
 
   // Redirect to home if already authenticated (from successful verification)
   useEffect(() => {
