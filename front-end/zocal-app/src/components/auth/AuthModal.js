@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Dialog,
@@ -11,127 +11,238 @@ import {
   CircularProgress,
   Alert,
   Box,
-  IconButton
+  IconButton,
+  Typography,
+  InputAdornment
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
-import { loginUser, registerUser, clearError } from '../../store/authSlice';
+import { 
+  Close as CloseIcon, 
+  CheckCircle as CheckCircleIcon, 
+  Cancel as CancelIcon,
+  Visibility,
+  VisibilityOff 
+} from '@mui/icons-material';
+import { 
+  loginUser, 
+  registerUser, 
+  forgotPassword, 
+  clearError, 
+  clearSuccessMessage 
+} from '../../store/authSlice';
 
-const AuthModal = ({ open, onClose }) => {
+const AuthModal = ({ open, onClose, onRegistrationSuccess }) => {
   const dispatch = useDispatch();
-  const { loading: authLoading, error: authError } = useSelector(state => state.auth);
+  const { 
+    loading, 
+    error, 
+    successMessage, 
+    registrationSuccess, 
+    forgotPasswordSuccess 
+  } = useSelector(state => state.auth);
 
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [authFormData, setAuthFormData] = useState({
-    name: '',
+  // Authentication mode: 'login', 'signup', 'forgot'
+  const [authMode, setAuthMode] = useState('login');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [authFormErrors, setAuthFormErrors] = useState({});
+  
+  const [formErrors, setFormErrors] = useState({});
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasLetter: false,
+    hasNumber: false,
+    hasSpecial: false
+  });
 
-  // Handle authentication form input changes
-  const handleAuthFormChange = (e) => {
+  // Password confirmation validation
+  const [passwordMatch, setPasswordMatch] = useState(null); // null, true, or false
+
+  // Reset form when modal opens/closes or auth mode changes
+  useEffect(() => {
+    if (open) {
+      setFormData({ email: '', password: '', confirmPassword: '' });
+      setFormErrors({});
+      setPasswordValidation({ minLength: false, hasLetter: false, hasNumber: false, hasSpecial: false });
+      setPasswordMatch(null);
+      dispatch(clearError());
+      dispatch(clearSuccessMessage());
+    }
+  }, [open, authMode, dispatch]);
+
+  // Validate email format
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validate password strength
+  const validatePassword = (password) => {
+    const validation = {
+      minLength: password.length >= 8,
+      hasLetter: /[a-zA-Z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecial: /[@$!%*?&]/.test(password)
+    };
+    setPasswordValidation(validation);
+    return Object.values(validation).every(v => v);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setAuthFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear specific field error when user starts typing
-    if (authFormErrors[name]) {
-      setAuthFormErrors(prev => ({ ...prev, [name]: '' }));
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
+
+    // Real-time password validation for signup
+    if (name === 'password' && authMode === 'signup') {
+      validatePassword(value);
+      
+      // Check password match if confirm password exists
+      if (formData.confirmPassword) {
+        setPasswordMatch(value === formData.confirmPassword);
+      }
+    }
+
+    // Real-time password confirmation validation
+    if (name === 'confirmPassword' && authMode === 'signup') {
+      setPasswordMatch(value === formData.password);
     }
   };
 
-  // Toggle between sign up and log in
-  const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp);
-    setAuthFormErrors({});
-    setAuthFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
-    dispatch(clearError());
-  };
-
-  // Validate authentication form
-  const validateAuthForm = () => {
+  // Validate form based on current mode
+  const validateForm = () => {
     const errors = {};
     
-    if (isSignUp && !authFormData.name.trim()) {
-      errors.name = 'Name is required';
-    }
-    
-    if (!authFormData.email.trim()) {
+    // Email validation (all modes)
+    if (!formData.email.trim()) {
       errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(authFormData.email)) {
-      errors.email = 'Please enter a valid email';
+    } else if (!validateEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
     }
-    
-    if (!authFormData.password) {
-      errors.password = 'Password is required';
-    } else if (authFormData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+
+    // Mode-specific validation
+    if (authMode === 'signup') {
+      // Password validation
+      if (!formData.password) {
+        errors.password = 'Password is required';
+      } else if (!validatePassword(formData.password)) {
+        errors.password = 'Password must meet all requirements';
+      }
+
+      // Confirm password validation
+      if (!formData.confirmPassword) {
+        errors.confirmPassword = 'Please confirm your password';
+      } else if (formData.password !== formData.confirmPassword) {
+        errors.confirmPassword = 'Passwords do not match';
+      }
+    } else if (authMode === 'login') {
+      // Password validation for login
+      if (!formData.password) {
+        errors.password = 'Password is required';
+      } else if (formData.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters';
+      }
     }
-    
-    if (isSignUp && authFormData.password !== authFormData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-    
+
     return errors;
   };
 
-  // Handle authentication form submission
-  const handleAuthSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(clearError());
     
-    const errors = validateAuthForm();
+    const errors = validateForm();
     if (Object.keys(errors).length > 0) {
-      setAuthFormErrors(errors);
+      setFormErrors(errors);
       return;
     }
     
-    setAuthFormErrors({});
+    setFormErrors({});
     
     try {
-      if (isSignUp) {
-        await dispatch(registerUser({
-          name: authFormData.name,
-          email: authFormData.email,
-          password: authFormData.password
-        })).unwrap();
-      } else {
+      if (authMode === 'login') {
         await dispatch(loginUser({
-          email: authFormData.email,
-          password: authFormData.password
+          email: formData.email,
+          password: formData.password
         })).unwrap();
+        
+        // Close modal on successful login
+        onClose();
+      } else if (authMode === 'signup') {
+        await dispatch(registerUser({
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword
+        })).unwrap();
+        
+        // Close modal and show registration success modal
+        onClose();
+        if (onRegistrationSuccess) {
+          onRegistrationSuccess();
+        }
+      } else if (authMode === 'forgot') {
+        await dispatch(forgotPassword({
+          email: formData.email
+        })).unwrap();
+        
+        // Don't close modal - show success message
       }
-      // Close modal and reset form on success
-      onClose();
-      setAuthFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setAuthFormErrors({});
-      setIsSignUp(false);
     } catch (error) {
-      // Error handled by Redux
+      // Errors are handled by Redux
     }
   };
 
+  // Change auth mode
+  const switchAuthMode = (mode) => {
+    setAuthMode(mode);
+    setFormData({ email: '', password: '', confirmPassword: '' });
+    setFormErrors({});
+    setPasswordValidation({ minLength: false, hasLetter: false, hasNumber: false, hasSpecial: false });
+    setPasswordMatch(null);
+    dispatch(clearError());
+    dispatch(clearSuccessMessage());
+  };
+
+  // Handle modal close
   const handleClose = () => {
     onClose();
-    setAuthFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
-    setAuthFormErrors({});
-    setIsSignUp(false);
+    setAuthMode('login');
+    setFormData({ email: '', password: '', confirmPassword: '' });
+    setFormErrors({});
+    setPasswordValidation({ minLength: false, hasLetter: false, hasNumber: false, hasSpecial: false });
+    setPasswordMatch(null);
     dispatch(clearError());
+    dispatch(clearSuccessMessage());
+  };
+
+  // Get modal title
+  const getTitle = () => {
+    switch (authMode) {
+      case 'login': return 'Log In';
+      case 'signup': return 'Sign Up';
+      case 'forgot': return 'Forgot Password';
+      default: return 'Authentication';
+    }
+  };
+
+  // Get submit button text
+  const getSubmitButtonText = () => {
+    if (loading) return <CircularProgress size={24} color="inherit" />;
+    switch (authMode) {
+      case 'login': return 'Log In';
+      case 'signup': return 'Register';
+      case 'forgot': return 'Send Reset Email';
+      default: return 'Submit';
+    }
   };
 
   return (
@@ -145,99 +256,234 @@ const AuthModal = ({ open, onClose }) => {
       }}
     >
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-        {isSignUp ? 'Sign Up' : 'Log In'}
+        {getTitle()}
         <IconButton onClick={handleClose}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
       
       <DialogContent>
-        {authError && (
+        {/* Success Message (for forgot password only) */}
+        {(forgotPasswordSuccess && !registrationSuccess) && successMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
+
+        {/* Error Message */}
+        {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {authError}
+            {error}
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleAuthSubmit} sx={{ mt: 1 }}>
-          {isSignUp && (
-            <TextField
-              fullWidth
-              label="Name"
-              name="name"
-              value={authFormData.name}
-              onChange={handleAuthFormChange}
-              error={!!authFormErrors.name}
-              helperText={authFormErrors.name}
-              margin="normal"
-              required
-            />
-          )}
-          
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          {/* Email Field (All modes) */}
           <TextField
             fullWidth
             label="Email"
             name="email"
             type="email"
-            value={authFormData.email}
-            onChange={handleAuthFormChange}
-            error={!!authFormErrors.email}
-            helperText={authFormErrors.email}
+            value={formData.email}
+            onChange={handleInputChange}
+            error={!!formErrors.email}
+            helperText={formErrors.email}
             margin="normal"
             required
           />
           
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            type="password"
-            value={authFormData.password}
-            onChange={handleAuthFormChange}
-            error={!!authFormErrors.password}
-            helperText={authFormErrors.password}
-            margin="normal"
-            required
-          />
+          {/* Password Field (Login and Signup) */}
+          {authMode !== 'forgot' && (
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleInputChange}
+              error={!!formErrors.password}
+              helperText={formErrors.password}
+              margin="normal"
+              required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+          )}
+
+          {/* Password Requirements (Signup only) */}
+          {authMode === 'signup' && (
+            <Box sx={{ mt: 1, mb: 2 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Password must contain:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: passwordValidation.minLength ? 'success.main' : 'error.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  {passwordValidation.minLength ? <CheckCircleIcon fontSize="small" /> : <CancelIcon fontSize="small" />}
+                  At least 8 characters
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: passwordValidation.hasLetter ? 'success.main' : 'error.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  {passwordValidation.hasLetter ? <CheckCircleIcon fontSize="small" /> : <CancelIcon fontSize="small" />}
+                  One letter
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: passwordValidation.hasNumber ? 'success.main' : 'error.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  {passwordValidation.hasNumber ? <CheckCircleIcon fontSize="small" /> : <CancelIcon fontSize="small" />}
+                  One number
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: passwordValidation.hasSpecial ? 'success.main' : 'error.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  {passwordValidation.hasSpecial ? <CheckCircleIcon fontSize="small" /> : <CancelIcon fontSize="small" />}
+                  One special character (@$!%*?&)
+                </Typography>
+              </Box>
+            </Box>
+          )}
           
-          {isSignUp && (
+          {/* Confirm Password Field (Signup only) */}
+          {authMode === 'signup' && (
             <TextField
               fullWidth
               label="Confirm Password"
               name="confirmPassword"
-              type="password"
-              value={authFormData.confirmPassword}
-              onChange={handleAuthFormChange}
-              error={!!authFormErrors.confirmPassword}
-              helperText={authFormErrors.confirmPassword}
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              error={!!formErrors.confirmPassword}
+              helperText={formErrors.confirmPassword}
               margin="normal"
               required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {formData.confirmPassword && passwordMatch !== null && (
+                      passwordMatch ? 
+                        <CheckCircleIcon color="success" sx={{ mr: 1 }} /> : 
+                        <CancelIcon color="error" sx={{ mr: 1 }} />
+                    )}
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
             />
           )}
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ flexDirection: 'column', gap: 1, p: 3, pt: 1 }}>
+        {/* Submit Button */}
         <Button
           type="submit"
           fullWidth
           variant="contained"
-          onClick={handleAuthSubmit}
-          disabled={authLoading}
+          onClick={handleSubmit}
+          disabled={loading}
+          sx={{ mb: 1 }}
         >
-          {authLoading ? <CircularProgress size={24} /> : (isSignUp ? 'Sign Up' : 'Log In')}
+          {getSubmitButtonText()}
         </Button>
         
-        <Box textAlign="center">
-          <Link
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleAuthMode();
-            }}
-            sx={{ cursor: 'pointer' }}
-          >
-            {isSignUp ? 'Existing user? Log In' : 'New user? Sign Up'}
-          </Link>
+        {/* Mode switching links */}
+        <Box sx={{ textAlign: 'center', width: '100%' }}>
+          {authMode === 'login' && (
+            <>
+              <Box sx={{ mb: 1 }}>
+                <Link
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    switchAuthMode('forgot');
+                  }}
+                  sx={{ cursor: 'pointer', fontSize: '0.875rem' }}
+                >
+                  Forgot password?
+                </Link>
+              </Box>
+              
+              <Link
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  switchAuthMode('signup');
+                }}
+                sx={{ cursor: 'pointer' }}
+              >
+                New user? Sign Up
+              </Link>
+            </>
+          )}
+          
+          {authMode === 'signup' && (
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                switchAuthMode('login');
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              Existing user? Log In
+            </Link>
+          )}
+          
+          {authMode === 'forgot' && (
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                switchAuthMode('login');
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              Back to Log In
+            </Link>
+          )}
         </Box>
       </DialogActions>
     </Dialog>

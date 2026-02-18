@@ -15,10 +15,12 @@ import {
 } from '@mui/icons-material';
 import AuthModal from '../auth/AuthModal';
 import SettingsModal from '../modals/SettingsModal';
+import RegistrationSuccessModal from '../modals/RegistrationSuccessModal';
 
 const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [registrationSuccessModalOpen, setRegistrationSuccessModalOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -36,6 +38,19 @@ const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) 
 
   const handleCloseSettingsModal = () => {
     setSettingsModalOpen(false);
+  };
+
+  const handleRegistrationSuccess = () => {
+    setRegistrationSuccessModalOpen(true);
+  };
+
+  const handleCloseRegistrationSuccessModal = () => {
+    setRegistrationSuccessModalOpen(false);
+  };
+
+  const handleRegistrationSuccessLoginClick = () => {
+    setRegistrationSuccessModalOpen(false);
+    setAuthModalOpen(true);
   };
   return (
     <AppBar position="sticky" color="default" elevation={1} sx={{ zIndex: 1400 }}>
@@ -89,12 +104,19 @@ const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) 
       
       <AuthModal 
         open={authModalOpen} 
-        onClose={handleCloseAuthModal} 
+        onClose={handleCloseAuthModal}
+        onRegistrationSuccess={handleRegistrationSuccess}
       />
       
       <SettingsModal 
         open={settingsModalOpen} 
         onClose={handleCloseSettingsModal} 
+      />
+      
+      <RegistrationSuccessModal
+        open={registrationSuccessModalOpen}
+        onClose={handleCloseRegistrationSuccessModal}
+        onLoginClick={handleRegistrationSuccessLoginClick}
       />
     </AppBar>
   );

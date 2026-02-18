@@ -284,7 +284,7 @@ class EmailService {
         </div>
         
         <div class="content">
-          <p class="intro-text">Dear <strong>${user.name}</strong>,</p>
+          <p class="intro-text">Hello,</p>
           
           <p class="intro-text">This is a friendly reminder about your upcoming Zoroastrian event:</p>
           
@@ -380,7 +380,7 @@ class EmailService {
         </div>
         
         <div class="content">
-          <p class="intro-text">Dear <strong>${user.name}</strong>,</p>
+          <p class="intro-text">Hello,</p>
           
           <p class="intro-text">This is a friendly reminder about your upcoming Gregorian event:</p>
           
@@ -453,6 +453,161 @@ class EmailService {
 
     } catch (error) {
       console.error('❌ Email configuration test failed:', error.message);
+      throw error;
+    }
+  }
+
+  // Send email verification email
+  async sendVerificationEmail(user, token) {
+    try {
+      const initialized = await this.ensureInitialized();
+      
+      if (!initialized || !this.transporter) {
+        throw new Error('Email service not properly initialized');
+      }
+
+      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+      
+      const emailContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .header h1 { margin: 0; font-size: 28px; }
+            .content { background: #f8f9fa; padding: 35px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef; }
+            .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0; }
+            .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>🔗 Verify Your ZoCal Account</h1>
+          </div>
+          
+          <div class="content">
+            <p>Hello,</p>
+            
+            <p>Thank you for registering with ZoCal - Your Zoroastrian Calendar App! To complete your registration, please verify your email address by clicking the button below:</p>
+            
+            <div style="text-align: center;">
+              <a href="${verificationUrl}" class="button">Verify My Email Address</a>
+            </div>
+            
+            <p>If the button above doesn't work, copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; background: #f1f3f4; padding: 10px; border-radius: 5px; font-family: monospace;">${verificationUrl}</p>
+            
+            <div class="warning">
+              <strong>Important:</strong> This verification link will expire in 30 minutes for security reasons. If you don't verify within this time, you'll need to request a new verification email.
+            </div>
+            
+            <p>If you didn't create an account with ZoCal, please ignore this email.</p>
+            
+            <div class="footer">
+              <p><strong>ZoCal - Your Zoroastrian Calendar App</strong></p>
+              <p>Helping you stay connected to Zoroastrian traditions and celebrations.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: user.email,
+        subject: 'Verify Your ZoCal Account - Action Required',
+        html: emailContent
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(`✅ Verification email sent to ${user.email}`);
+      return result;
+
+    } catch (error) {
+      console.error(`❌ Failed to send verification email to ${user.email}:`, error.message);
+      throw error;
+    }
+  }
+
+  // Send password reset email
+  async sendPasswordResetEmail(user, token) {
+    try {
+      const initialized = await this.ensureInitialized();
+      
+      if (!initialized || !this.transporter) {
+        throw new Error('Email service not properly initialized');
+      }
+
+      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+      
+      const emailContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+            .header h1 { margin: 0; font-size: 28px; }
+            .content { background: #f8f9fa; padding: 35px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef; }
+            .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0; }
+            .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+            .warning { background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
+            .security-note { background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>🔒 Reset Your ZoCal Password</h1>
+          </div>
+          
+          <div class="content">
+            <p>Hello,</p>
+            
+            <p>We received a request to reset the password for your ZoCal account. If you made this request, click the button below to reset your password:</p>
+            
+            <div style="text-align: center;">
+              <a href="${resetUrl}" class="button">Reset My Password</a>
+            </div>
+            
+            <p>If the button above doesn't work, copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; background: #f1f3f4; padding: 10px; border-radius: 5px; font-family: monospace;">${resetUrl}</p>
+            
+            <div class="warning">
+              <strong>Important:</strong> This password reset link will expire in 30 minutes for security reasons. If you don't reset your password within this time, you'll need to request a new reset link.
+            </div>
+            
+            <div class="security-note">
+              <strong>Security Note:</strong> If you didn't request this password reset, please ignore this email. Your password will remain unchanged. Consider reviewing your account security if you receive multiple unexpected reset emails.
+            </div>
+            
+            <div class="footer">
+              <p><strong>ZoCal - Your Zoroastrian Calendar App</strong></p>
+              <p>Protecting your account and privacy is our priority.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: user.email,
+        subject: 'Reset Your ZoCal Password - Action Required',
+        html: emailContent
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(`✅ Password reset email sent to ${user.email}`);
+      return result;
+
+    } catch (error) {
+      console.error(`❌ Failed to send password reset email to ${user.email}:`, error.message);
       throw error;
     }
   }

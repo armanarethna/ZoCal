@@ -1,21 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 // =============================================
-// USER MODEL SCHEMA TEMPLATE
+// USER MODEL SCHEMA
 // =============================================
-// Customize this schema based on your application needs
 
 const userSchema = new mongoose.Schema({
   // Basic Information
-  name: {
-    type: String,
-    required: [true, 'Name is required'],
-    trim: true,
-    minlength: [2, 'Name must be at least 2 characters'],
-    maxlength: [50, 'Name cannot exceed 50 characters']
-  },
-  
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -28,8 +20,41 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
+    minlength: [8, 'Password must be at least 8 characters'],
     select: false // Don't include password in queries by default
+  },
+
+  // Email Verification
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  
+  emailVerificationToken: {
+    type: String,
+    select: false
+  },
+  
+  emailVerificationTokenExpires: {
+    type: Date,
+    select: false
+  },
+
+  // Password Reset
+  passwordResetToken: {
+    type: String,
+    select: false
+  },
+  
+  passwordResetTokenExpires: {
+    type: Date,
+    select: false
+  },
+
+  // Account Status
+  isActive: {
+    type: Boolean,
+    default: false // Only becomes true after email verification
   },
 
   // User Preferences
@@ -52,6 +77,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Timezone is required'],
     default: 'Asia/Kolkata'
+  },
+
+  // Tracking
+  lastLogin: {
+    type: Date
   }
   
 }, {
@@ -93,6 +123,46 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Generate email verification token
+userSchema.methods.createEmailVerificationToken = function() {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+  
+  this.emailVerificationTokenExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
+  
+  return verificationToken;
+};
+
+// Generate password reset token
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  this.passwordResetTokenExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
+  
+  return resetToken;
+};
+
+// Verify email verification token
+userSchema.methods.verifyEmailToken = function(token) {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  return this.emailVerificationToken === hashedToken && this.emailVerificationTokenExpires > Date.now();
+};
+
+// Verify password reset token
+userSchema.methods.verifyResetToken = function(token) {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  return this.passwordResetToken === hashedToken && this.passwordResetTokenExpires > Date.now();
+};
+
 // Get public profile data
 userSchema.methods.getPublicProfile = function() {
   const userObject = this.toObject();
@@ -108,6 +178,26 @@ userSchema.methods.getPublicProfile = function() {
 // Find user by email
 userSchema.statics.findByEmail = function(email) {
   return this.findOne({ email: email.toLowerCase() });
+};
+
+// Find user by verification token
+userSchema.statics.findByVerificationToken = function(token) {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  
+  return this.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationTokenExpires: { $gt: Date.now() }
+  })
+  .select('+emailVerificationToken +emailVerificationTokenExpires');
+};
+
+// Find user by reset token
+userSchema.statics.findByResetToken = function(token) {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  return this.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetTokenExpires: { $gt: Date.now() }
+  }).select('+passwordResetToken +passwordResetTokenExpires');
 };
 
 // =============================================

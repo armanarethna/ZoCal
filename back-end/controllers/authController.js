@@ -3,27 +3,31 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 const { successResponse, errorResponse } = require('../utils/helpers');
+const emailService = require('../utils/emailService');
 
 // =============================================
 // VALIDATION RULES
 // =============================================
 
 const register = [
-  body('name')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
-  
   body('email')
     .isEmail()
     .normalizeEmail()
     .withMessage('Please enter a valid email'),
   
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one lowercase, one uppercase letter and one number')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
+
+  body('confirmPassword')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Password confirmation does not match password');
+      }
+      return true;
+    })
 ];
 
 const login = [
@@ -33,16 +37,35 @@ const login = [
     .withMessage('Please enter a valid email'),
   
   body('password')
-    .notEmpty()
-    .withMessage('Password is required')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+];
+
+const forgotPassword = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please enter a valid email')
+];
+
+const resetPassword = [
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
+
+  body('confirmPassword')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Password confirmation does not match password');
+      }
+      return true;
+    })
 ];
 
 const updateProfile = [
-  body('name')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters')
+  // No profile fields to update currently
 ];
 
 const updateSettings = [
@@ -70,35 +93,38 @@ const handleRegisterUser = async (req, res) => {
       return res.status(400).json(errorResponse('Validation errors', errors.array()));
     }
 
-    const { name, email, password } = req.body;
+    const { email, password } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
-      return res.status(400).json(errorResponse('User with this email already exists'));
+      return res.status(400).json(errorResponse('A user with this email already exists'));
     }
 
-    // Create new user
+    // Create new user (not active until email verification)
     const user = new User({
-      name,
       email,
-      password
+      password,
+      isVerified: false,
+      isActive: false
     });
 
+    // Generate email verification token
+    const verificationToken = user.createEmailVerificationToken();
     await user.save();
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Send verification email
+    try {
+      await emailService.sendVerificationEmail(user, verificationToken);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Continue with registration even if email fails
+    }
 
     res.status(201).json(successResponse(
-      'User registered successfully',
+      'Registration successful! Please check your email to verify your account.',
       {
-        token,
-        user: user.getPublicProfile()
+        message: 'A verification email has been sent to your email address. Please verify your email to complete registration.'
       },
       201
     ));
@@ -106,6 +132,51 @@ const handleRegisterUser = async (req, res) => {
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json(errorResponse('Server error during registration'));
+  }
+};
+
+// @desc    Verify email address
+const handleVerifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json(errorResponse('Verification token is required'));
+    }
+
+    // Find user by verification token (this already checks expiration)
+    const user = await User.findByVerificationToken(token);
+    
+    if (!user) {
+      return res.status(400).json(errorResponse('Invalid or expired verification token. This link may have already been used or has expired. Please request a new verification email if needed.'));
+    }
+
+    // Update user status
+    user.isVerified = true;
+    user.isActive = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationTokenExpires = undefined;
+    
+    await user.save();
+
+    // Generate JWT token for immediate login
+    const authToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json(successResponse(
+      'Email verified successfully! You are now logged in.',
+      {
+        token: authToken,
+        user: user.getPublicProfile()
+      }
+    ));
+
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json(errorResponse('Server error during email verification'));
   }
 };
 
@@ -132,6 +203,15 @@ const handleLoginUser = async (req, res) => {
       return res.status(400).json(errorResponse('Invalid email or password'));
     }
 
+    // Check if user is verified and active
+    if (!user.isVerified) {
+      return res.status(400).json(errorResponse('Please verify your email address before logging in. Check your email for the verification link.'));
+    }
+
+    if (!user.isActive) {
+      return res.status(400).json(errorResponse('Your account is not active. Please contact support.'));
+    }
+
     // Update last login
     user.lastLogin = new Date();
     await user.save();
@@ -154,6 +234,108 @@ const handleLoginUser = async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json(errorResponse('Server error during login'));
+  }
+};
+
+// @desc    Forgot password - send reset email
+const handleForgotPassword = async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json(errorResponse('Validation errors', errors.array()));
+    }
+
+    const { email } = req.body;
+
+    // Find user by email
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(400).json(errorResponse('No user found with this email address'));
+    }
+
+    // Check if user is verified and active
+    if (!user.isVerified || !user.isActive) {
+      return res.status(400).json(errorResponse('Account must be verified and active to reset password'));
+    }
+
+    // Generate password reset token
+    const resetToken = user.createPasswordResetToken();
+    await user.save();
+
+    // Send password reset email
+    try {
+      await emailService.sendPasswordResetEmail(user, resetToken);
+
+      res.json(successResponse(
+        'Password reset email sent successfully',
+        {
+          message: 'If an account with this email exists, a password reset link has been sent to your email address.'
+        }
+      ));
+
+    } catch (emailError) {
+      console.error('Failed to send reset email:', emailError);
+      
+      // Clear the reset token since email failed
+      user.passwordResetToken = undefined;
+      user.passwordResetTokenExpires = undefined;
+      await user.save();
+      
+      res.status(500).json(errorResponse('Failed to send reset email. Please try again.'));
+    }
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json(errorResponse('Server error during password reset request'));
+  }
+};
+
+// @desc    Reset password with token
+const handleResetPassword = async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json(errorResponse('Validation errors', errors.array()));
+    }
+
+    const { token } = req.query;
+    const { password } = req.body;
+
+    if (!token) {
+      return res.status(400).json(errorResponse('Reset token is required'));
+    }
+
+    // Find user by reset token
+    const user = await User.findByResetToken(token);
+    
+    if (!user) {
+      return res.status(400).json(errorResponse('Invalid or expired reset token'));
+    }
+
+    // Verify the token
+    if (!user.verifyResetToken(token)) {
+      return res.status(400).json(errorResponse('Invalid or expired reset token'));
+    }
+
+    // Update password
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
+    
+    await user.save();
+
+    res.json(successResponse(
+      'Password reset successful',
+      {
+        message: 'Your password has been reset successfully. You can now log in with your new password.'
+      }
+    ));
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json(errorResponse('Server error during password reset'));
   }
 };
 
@@ -190,10 +372,9 @@ const handleUpdateUserProfile = async (req, res) => {
       return res.status(404).json(errorResponse('User not found'));
     }
 
-    // Update fields
-    const { name } = req.body;
-    if (name) user.name = name;
-
+    // No profile fields to update currently
+    // This endpoint is kept for future profile updates
+    
     await user.save();
 
     res.json(successResponse(
@@ -242,11 +423,16 @@ const handleUpdateUserSettings = async (req, res) => {
 module.exports = {
   handleRegisterUser,
   handleLoginUser,
+  handleVerifyEmail,
+  handleForgotPassword,
+  handleResetPassword,
   handleGetCurrentUser,
   handleUpdateUserProfile,
   handleUpdateUserSettings,
   register,
   login,
+  forgotPassword,
+  resetPassword,
   updateProfile,
   updateSettings
 };

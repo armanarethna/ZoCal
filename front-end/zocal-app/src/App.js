@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider, Snackbar, Alert } from '@mui/material';
 import { toggleTheme } from './store/themeSlice';
 import { logout, getCurrentUser } from './store/authSlice';
@@ -7,11 +8,27 @@ import { useAppTheme } from './theme/theme';
 import { useCSSVariableTheme } from './hooks/useCSSVariableTheme';
 import Header from './components/molecules/Header';
 import TabsNavigation from './components/molecules/TabsNavigation';
+import EmailVerification from './components/auth/EmailVerification';
+import PasswordReset from './components/auth/PasswordReset';
 import { DEFAULTS } from './constants';
 import './App.css';
 
-function App() {
+// Main app component
+const MainApp = () => {
   const [tabValue, setTabValue] = useState(DEFAULTS.TAB_VALUE);
+  
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  return (
+    <>
+      <TabsNavigation tabValue={tabValue} handleTabChange={handleTabChange} />
+    </>
+  );
+};
+
+function App() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   
   const { darkMode } = useSelector((state) => state.theme);
@@ -29,10 +46,6 @@ function App() {
       dispatch(getCurrentUser());
     }
   }, [dispatch, user]);
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
 
   const handleThemeToggle = () => {
     dispatch(toggleTheme());
@@ -59,7 +72,12 @@ function App() {
           isAuthenticated={isAuthenticated}
           handleLogout={handleLogout}
         />
-        <TabsNavigation tabValue={tabValue} handleTabChange={handleTabChange} />
+        
+        <Routes>
+          <Route path="/" element={<MainApp />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
+          <Route path="/reset-password" element={<PasswordReset />} />
+        </Routes>
         
         <Snackbar
           open={snackbar.open}
