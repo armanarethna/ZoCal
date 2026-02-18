@@ -108,18 +108,6 @@ export const DEFAULT_ZORO_CAL_OPTIONS = {
 // UI CONSTANTS
 // =============================================
 
-// Validation Messages
-export const VALIDATION_MESSAGES = {
-  NAME_REQUIRED: 'Name is required',
-  NAME_LENGTH: 'Name must be between 2 and 50 characters',
-  EMAIL_REQUIRED: 'Email is required',
-  EMAIL_INVALID: 'Please enter a valid email',
-  PASSWORD_REQUIRED: 'Password is required',
-  PASSWORD_LENGTH: 'Password must be at least 6 characters',
-  PASSWORD_COMPLEXITY: 'Password must contain at least one lowercase, one uppercase letter and one number',
-  PASSWORDS_DONT_MATCH: 'Passwords do not match'
-};
-
 // =============================================
 // TOOLTIP CONSTANTS
 // =============================================
