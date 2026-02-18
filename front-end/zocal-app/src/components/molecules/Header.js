@@ -13,7 +13,7 @@ import {
   Login as LoginIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
-import AuthModal from '../auth/AuthModal';
+import AuthController from '../auth/AuthController';
 import SettingsModal from '../modals/SettingsModal';
 import RegistrationSuccessModal from '../modals/RegistrationSuccessModal';
 
@@ -102,7 +102,7 @@ const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) 
         )}
       </Toolbar>
       
-      <AuthModal 
+      <AuthController 
         open={authModalOpen} 
         onClose={handleCloseAuthModal}
         onRegistrationSuccess={handleRegistrationSuccess}

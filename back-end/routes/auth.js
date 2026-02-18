@@ -8,12 +8,14 @@ const {
   handleGetCurrentUser,
   handleUpdateUserProfile,
   handleUpdateUserSettings,
+  handleResendVerificationEmail,
   register,
   login,
   forgotPassword,
   resetPassword,
   updateProfile,
-  updateSettings
+  updateSettings,
+  resendVerificationEmail
 } = require('../controllers/authController');
 const { auth } = require('../middleware/auth');
 
@@ -29,6 +31,7 @@ router.post('/login', login, handleLoginUser);
 
 // Email verification
 router.get('/verify-email', handleVerifyEmail);
+router.post('/resend-verification', resendVerificationEmail, handleResendVerificationEmail);
 
 // Password reset
 router.post('/forgot-password', forgotPassword, handleForgotPassword);
@@ -38,7 +41,5 @@ router.post('/reset-password', resetPassword, handleResetPassword);
 router.get('/me', auth, handleGetCurrentUser);
 router.put('/profile', auth, updateProfile, handleUpdateUserProfile);
 router.put('/settings', auth, updateSettings, handleUpdateUserSettings);
-
-module.exports = router;
 
 module.exports = router;

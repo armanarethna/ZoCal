@@ -64,6 +64,13 @@ const resetPassword = [
     })
 ];
 
+const resendVerificationEmail = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please enter a valid email')
+];
+
 const updateProfile = [
   // No profile fields to update currently
 ];
@@ -420,6 +427,65 @@ const handleUpdateUserSettings = async (req, res) => {
   }
 };
 
+// @desc    Resend email verification
+const handleResendVerificationEmail = async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json(errorResponse('Validation errors', errors.array()));
+    }
+
+    const { email } = req.body;
+
+    // Find user by email
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(400).json(errorResponse('No user found with this email address'));
+    }
+
+    // Check if user is already verified
+    if (user.isVerified) {
+      return res.status(400).json(errorResponse('This email address is already verified'));
+    }
+
+    // Check if user account is active (shouldn't be for unverified users, but just in case)
+    if (user.isActive) {
+      return res.status(400).json(errorResponse('Account is already active'));
+    }
+
+    // Generate new email verification token
+    const verificationToken = user.createEmailVerificationToken();
+    await user.save();
+
+    // Send verification email
+    try {
+      await emailService.sendVerificationEmail(user, verificationToken);
+      
+      res.json(successResponse(
+        'Verification email sent successfully',
+        {
+          message: 'A new verification email has been sent to your email address. Please check your inbox and verify your email to complete registration.'
+        }
+      ));
+
+    } catch (emailError) {
+      console.error('Failed to resend verification email:', emailError);
+      
+      // Clear the verification token since email failed
+      user.emailVerificationToken = undefined;
+      user.emailVerificationTokenExpires = undefined;
+      await user.save();
+      
+      res.status(500).json(errorResponse('Failed to send verification email. Please try again.'));
+    }
+
+  } catch (error) {
+    console.error('Resend verification email error:', error);
+    res.status(500).json(errorResponse('Server error during email resend'));
+  }
+};
+
 module.exports = {
   handleRegisterUser,
   handleLoginUser,
@@ -429,10 +495,12 @@ module.exports = {
   handleGetCurrentUser,
   handleUpdateUserProfile,
   handleUpdateUserSettings,
+  handleResendVerificationEmail,
   register,
   login,
   forgotPassword,
   resetPassword,
   updateProfile,
-  updateSettings
+  updateSettings,
+  resendVerificationEmail
 };

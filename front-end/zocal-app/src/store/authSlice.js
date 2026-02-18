@@ -136,6 +136,31 @@ export const verifyEmail = createAsyncThunk(
   }
 );
 
+export const resendVerificationEmail = createAsyncThunk(
+  'auth/resendVerificationEmail',
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/resend-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data);
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue({ message: 'Network error occurred' });
+    }
+  }
+);
+
 export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
@@ -210,6 +235,7 @@ const authSlice = createSlice({
     forgotPasswordSuccess: false,
     resetPasswordSuccess: false,
     verificationSuccess: false,
+    resendVerificationSuccess: false,
   },
   reducers: {
     logout: (state) => {
@@ -223,6 +249,7 @@ const authSlice = createSlice({
       state.forgotPasswordSuccess = false;
       state.resetPasswordSuccess = false;
       state.verificationSuccess = false;
+      state.resendVerificationSuccess = false;
     },
     clearError: (state) => {
       state.error = null;
@@ -233,6 +260,10 @@ const authSlice = createSlice({
       state.forgotPasswordSuccess = false;
       state.resetPasswordSuccess = false;
       state.verificationSuccess = false;
+      state.resendVerificationSuccess = false;
+    },
+    clearResendSuccess: (state) => {
+      state.resendVerificationSuccess = false;
     },
   },
   extraReducers: (builder) => {
@@ -365,9 +396,27 @@ const authSlice = createSlice({
       .addCase(updateUserSettings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Settings update failed';
+      })
+      
+      // Resend verification email cases
+      .addCase(resendVerificationEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.resendVerificationSuccess = false;
+      })
+      .addCase(resendVerificationEmail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.resendVerificationSuccess = true;
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(resendVerificationEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.resendVerificationSuccess = false;
+        state.error = action.payload?.message || 'Failed to resend verification email';
       });
   },
 });
 
-export const { logout, clearError, clearSuccessMessage } = authSlice.actions;
+export const { logout, clearError, clearSuccessMessage, clearResendSuccess } = authSlice.actions;
 export default authSlice.reducer;

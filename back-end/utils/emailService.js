@@ -499,8 +499,8 @@ class EmailService {
             .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
             .header h1 { margin: 0; font-size: 28px; }
             .content { background: #f8f9fa; padding: 35px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef; }
-            .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0; }
-            .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+            .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0; }
+            .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); color: white !important; }
             .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
             .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
           </style>
@@ -516,7 +516,7 @@ class EmailService {
             <p>Thank you for registering with ZoCal - Your Zoroastrian Calendar App! To complete your registration, please verify your email address by clicking the button below:</p>
             
             <div style="text-align: center;">
-              <a href="${verificationUrl}" class="button">Verify My Email Address</a>
+              <a href="${verificationUrl}" class="button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0;">Verify My Email Address</a>
             </div>
             
             <p>If the button above doesn't work, copy and paste this link into your browser:</p>
@@ -575,8 +575,8 @@ class EmailService {
             .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
             .header h1 { margin: 0; font-size: 28px; }
             .content { background: #f8f9fa; padding: 35px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef; }
-            .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0; }
-            .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+            .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0; }
+            .button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); color: white !important; }
             .warning { background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
             .security-note { background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
             .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
@@ -593,7 +593,7 @@ class EmailService {
             <p>We received a request to reset the password for your ZoCal account. If you made this request, click the button below to reset your password:</p>
             
             <div style="text-align: center;">
-              <a href="${resetUrl}" class="button">Reset My Password</a>
+              <a href="${resetUrl}" class="button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; text-align: center; margin: 20px 0;">Reset My Password</a>
             </div>
             
             <p>If the button above doesn't work, copy and paste this link into your browser:</p>
