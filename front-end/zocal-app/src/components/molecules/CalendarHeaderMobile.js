@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, Today } from '@mui/icons-material';
 import { getMonth, getYear } from 'date-fns';
 import { GREGORIAN_MONTHS, ZOROASTRIAN_CALENDAR_TYPES } from '../../constants';
 
-const MobileCalendarHeader = ({
+const CalendarHeaderMobile = ({
   currentDate,
   calendarType,
   isCurrentMonth,
@@ -88,4 +88,4 @@ const MobileCalendarHeader = ({
   );
 };
 
-export default MobileCalendarHeader;
+export default CalendarHeaderMobile;

@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, Today } from '@mui/icons-material';
 import { getMonth, getYear } from 'date-fns';
 import { GREGORIAN_MONTHS, ZOROASTRIAN_CALENDAR_TYPES } from '../../constants';
 
-const DesktopCalendarHeader = ({
+const CalendarHeaderDesktop = ({
   currentDate,
   calendarType,
   isCurrentMonth,
@@ -120,4 +120,4 @@ const DesktopCalendarHeader = ({
   );
 };
 
-export default DesktopCalendarHeader;
+export default CalendarHeaderDesktop;

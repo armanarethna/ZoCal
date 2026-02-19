@@ -7,7 +7,7 @@ import { logout, getCurrentUser } from './store/authSlice';
 import { useAppTheme } from './theme/theme';
 import { useCSSVariableTheme } from './hooks/useCSSVariableTheme';
 import Header from './components/molecules/Header';
-import TabsNavigation from './components/molecules/TabsNavigation';
+import TabsNavigation from './components/tabs/TabsNavigation';
 import EmailVerification from './components/auth/EmailVerification';
 import PasswordReset from './components/auth/PasswordReset';
 import { DEFAULTS } from './constants';

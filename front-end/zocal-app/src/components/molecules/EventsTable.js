@@ -33,7 +33,7 @@ import {
 } from '../../utils/zoroastrianCalendar';
 import { ZOROASTRIAN_CALENDAR_TYPES, TOOLTIP_TEXT } from '../../constants';
 
-const ZoroastrianEventTable = (props) => {
+const EventsTable = (props) => {
   const { 
     events = [], 
     loading, 
@@ -189,4 +189,4 @@ const ZoroastrianEventTable = (props) => {
   );
 };
 
-export default ZoroastrianEventTable;
+export default EventsTable;

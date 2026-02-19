@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { format } from 'date-fns';
 import { gregorianToZoroastrian, zoroDayType, getSpecialDateInfo } from '../../utils/zoroastrianCalendar';
-import ZoroastrianTooltip from './ZoroastrianTooltip';
+import CalendarTileTooltip from './CalendarTileTooltip';
 import { useTooltip } from '../../contexts/TooltipContext';
 
 const CalendarTile = ({ dayObj, calendarType }) => {
@@ -102,7 +102,7 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   };
   
   return (
-    <ZoroastrianTooltip
+    <CalendarTileTooltip
       date={date}
       zoroastrianDate={zoroastrianDate}
       specialDateInfo={specialDateInfo}
@@ -187,7 +187,7 @@ const CalendarTile = ({ dayObj, calendarType }) => {
         ) : null}
       </CardContent>
     </Card>
-    </ZoroastrianTooltip>
+    </CalendarTileTooltip>
   );
 };
 

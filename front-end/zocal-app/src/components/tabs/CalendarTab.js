@@ -10,8 +10,8 @@ import {
 import { setYear, setMonth, isSameMonth } from 'date-fns';
 import { nextMonth, prevMonth, goToToday, setCurrentDate } from '../../store/calendarSlice';
 import CalendarTile from '../molecules/CalendarTile';
-import MobileCalendarHeader from '../molecules/MobileCalendarHeader';
-import DesktopCalendarHeader from '../molecules/DesktopCalendarHeader';
+import CalendarHeaderMobile from '../molecules/CalendarHeaderMobile';
+import CalendarHeaderDesktop from '../molecules/CalendarHeaderDesktop';
 import CalendarInfoBox from '../molecules/CalendarInfoBox';
 import { WEEKDAYS_FULL, WEEKDAYS_SHORT, DEFAULTS } from '../../constants';
 import { TooltipProvider } from '../../contexts/TooltipContext';
@@ -95,7 +95,7 @@ const CalendarTab = () => {
         }}
       >
         {isMobile ? (
-          <MobileCalendarHeader
+          <CalendarHeaderMobile
             currentDate={currentDate}
             calendarType={calendarType}
             isCurrentMonth={isCurrentMonth}
@@ -107,7 +107,7 @@ const CalendarTab = () => {
             onCalendarTypeChange={handleCalendarTypeChange}
           />
         ) : (
-          <DesktopCalendarHeader
+          <CalendarHeaderDesktop
             currentDate={currentDate}
             calendarType={calendarType}
             isCurrentMonth={isCurrentMonth}

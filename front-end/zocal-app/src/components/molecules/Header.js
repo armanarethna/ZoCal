@@ -17,7 +17,7 @@ import {
 } from '@mui/icons-material';
 import AuthController from '../auth/AuthController';
 import SettingsModal from '../modals/SettingsModal';
-import RegistrationSuccessModal from '../modals/RegistrationSuccessModal';
+import RegistrationSuccessModal from '../auth/RegistrationSuccessModal';
 
 const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) => {
   const [authModalOpen, setAuthModalOpen] = useState(false);

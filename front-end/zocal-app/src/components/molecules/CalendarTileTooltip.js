@@ -16,7 +16,7 @@ import {
   GATHA_MEANINGS
 } from '../../constants';
 
-const ZoroastrianTooltip = ({ 
+const CalendarTileTooltip = ({ 
   children, 
   date, 
   zoroastrianDate, 
@@ -143,4 +143,4 @@ const ZoroastrianTooltip = ({
   );
 };
 
-export default ZoroastrianTooltip;
+export default CalendarTileTooltip;

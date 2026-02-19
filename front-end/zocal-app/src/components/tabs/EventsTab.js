@@ -10,7 +10,7 @@ import {
   Event as EventIcon
 } from '@mui/icons-material';
 import EventModal from '../modals/EventModal';
-import ZoroastrianEventTable from '../molecules/ZoroastrianEventTable';
+import EventsTable from '../molecules/EventsTable';
 import { getAllEvents } from '../../store/eventsSlice';
 
 const EventsTab = () => {
@@ -103,7 +103,7 @@ const EventsTab = () => {
           </Paper>
         </Container>
       ) : (
-        <ZoroastrianEventTable
+        <EventsTable
           events={events}
           loading={eventsLoading}
           error={eventsError}
