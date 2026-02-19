@@ -8,10 +8,7 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  Link,
   useMediaQuery,
   useTheme,
   Button,
@@ -25,13 +22,14 @@ import {
 // Components
 import EventsMobileView from './EventsMobileView';
 import EventsDesktopView from './EventsDesktopView';
+import ChangeDefaultCalendarModal from '../modals/ChangeDefaultCalendarModal';
 
 // Utils
 import { 
   calendarTypes,
   sortEventsByZoroastrianOccurrence
 } from '../../utils/zoroastrianCalendar';
-import { ZOROASTRIAN_CALENDAR_TYPES, TOOLTIP_TEXT } from '../../constants';
+import { TOOLTIP_TEXT } from '../../constants';
 
 const EventsTable = (props) => {
   const { 
@@ -46,6 +44,7 @@ const EventsTable = (props) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [calendarModalOpen, setCalendarModalOpen] = useState(false);
   
   
   const getInitialCalendarType = useCallback(() => {
@@ -99,9 +98,6 @@ const EventsTable = (props) => {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-              Events
-            </Typography>
             <Tooltip 
               title={TOOLTIP_TEXT.EVENTS_TAB}
               arrow
@@ -120,33 +116,37 @@ const EventsTable = (props) => {
                 <InfoIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <FormControl sx={{ minWidth: isMobile ? 120 : 180 }}>
-              <InputLabel>Calendar Type</InputLabel>
-              <Select
-                value={calendarType}
-                label="Calendar Type"
-                onChange={(e) => setCalendarType(e.target.value)}
-              >
-                {ZOROASTRIAN_CALENDAR_TYPES.map((type) => (
-                  <MenuItem key={type} value={calendarTypes[type.toUpperCase()]}>{type}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onAddEvent}
-              sx={{
-                fontSize: '1rem',
-                minWidth: '140px',
-                px: 3
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+              Events: {getCalendarTypeDisplayName()}
+            </Typography>
+            <Link
+              component="button"
+              variant="body2"
+              onClick={() => setCalendarModalOpen(true)}
+              sx={{ 
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                color: 'primary.main',
+                '&:hover': {
+                  color: 'primary.dark'
+                }
               }}
             >
-              Add Event
-            </Button>
+              Change
+            </Link>
           </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onAddEvent}
+            sx={{
+              fontSize: '1rem',
+              minWidth: '140px',
+              px: 3
+            }}
+          >
+            Add Event
+          </Button>
         </Box>
       </Box>
       
@@ -179,12 +179,17 @@ const EventsTable = (props) => {
         <EventsDesktopView 
           sortedEvents={sortedEvents}
           calendarType={calendarType}
-          getCalendarTypeDisplayName={getCalendarTypeDisplayName}
           onEditEvent={onEditEvent}
           onDeleteEvent={onDeleteEvent}
         />
       )}
     </Box>
+    
+    <ChangeDefaultCalendarModal
+      open={calendarModalOpen}
+      onClose={() => setCalendarModalOpen(false)}
+      currentCalendarType={calendarType}
+    />
     </Container>
   );
 };

@@ -31,7 +31,6 @@ import {
 const EventsDesktopView = ({ 
   sortedEvents, 
   calendarType, 
-  getCalendarTypeDisplayName,
   onEditEvent, 
   onDeleteEvent 
 }) => {
@@ -85,7 +84,7 @@ const EventsDesktopView = ({
             <TableCell className="date-column">
               Date
             </TableCell>
-            <TableCell className="details-column">{getCalendarTypeDisplayName()} Details</TableCell>
+            <TableCell className="details-column">Zoroastrian Details</TableCell>
             <TableCell className="fallson-column">
               Falls On
             </TableCell>

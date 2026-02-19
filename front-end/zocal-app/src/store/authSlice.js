@@ -193,7 +193,7 @@ export const getCurrentUser = createAsyncThunk(
 
 export const updateUserSettings = createAsyncThunk(
   'auth/updateUserSettings',
-  async ({ display_mode, default_zoro_cal }, { rejectWithValue }) => {
+  async ({ display_mode, default_zoro_cal, timezone }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -206,7 +206,7 @@ export const updateUserSettings = createAsyncThunk(
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ display_mode, default_zoro_cal }),
+        body: JSON.stringify({ display_mode, default_zoro_cal, timezone }),
       });
 
       const data = await response.json();

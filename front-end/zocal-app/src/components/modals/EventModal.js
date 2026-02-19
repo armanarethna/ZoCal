@@ -96,7 +96,7 @@ const EventModal = ({
     customCategory: '',
     eventDate: editingEvent ? new Date(editingEvent.eventDate) : new Date(),
     beforeSunrise: editingEvent?.beforeSunrise || false,
-    reminder_days: editingEvent?.reminder_days || 0,
+    reminder_days: editingEvent?.reminder_days !== undefined ? editingEvent.reminder_days : -1,
     reminder_time_hour: editingEvent?.reminder_time_hour || 12,
     reminder_time_ampm: editingEvent?.reminder_time_ampm || 'PM',
     reminder_for: editingEvent?.reminder_for || 'Zoroastrian'
@@ -114,7 +114,7 @@ const EventModal = ({
         customCategory: isCustomCategory ? editingEvent.category : '',
         eventDate: new Date(editingEvent.eventDate),
         beforeSunrise: editingEvent.beforeSunrise,
-        reminder_days: editingEvent.reminder_days || 0,
+        reminder_days: editingEvent.reminder_days !== undefined ? editingEvent.reminder_days : -1,
         reminder_time_hour: editingEvent.reminder_time_hour || 12,
         reminder_time_ampm: editingEvent.reminder_time_ampm || 'PM',
         reminder_for: editingEvent.reminder_for || 'Zoroastrian'
@@ -126,7 +126,7 @@ const EventModal = ({
         customCategory: '',
         eventDate: new Date(),
         beforeSunrise: false,
-        reminder_days: 0,
+        reminder_days: -1,
         reminder_time_hour: 12,
         reminder_time_ampm: 'PM',
         reminder_for: 'Zoroastrian'
@@ -343,7 +343,8 @@ const EventModal = ({
                   onChange={(e) => handleEventFormChange('reminder_days', e.target.value)}
                   label="Email Reminder"
                 >
-                  <MenuItem value={0}>No Reminder</MenuItem>
+                  <MenuItem value={-1}>No Reminder</MenuItem>
+                  <MenuItem value={0}>On The Day</MenuItem>
                   <MenuItem value={1}>1 Day Before</MenuItem>
                   <MenuItem value={3}>3 Days Before</MenuItem>
                   <MenuItem value={7}>1 Week Before</MenuItem>
@@ -371,10 +372,10 @@ const EventModal = ({
             </Box>
 
             {/* Show additional reminder settings if reminder is enabled */}
-            {eventFormData.reminder_days > 0 && (
+            {eventFormData.reminder_days !== -1 && (
               <>
                 {/* Reminder Time Selector */}
-                <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                <div style={{ display: 'flex', gap: '16px', marginTop: '16px', alignItems: 'center' }}>
                   <FormControl sx={{ minWidth: 120, flex: 1 }}>
                     <InputLabel>Reminder Time</InputLabel>
                     <Select
@@ -401,6 +402,19 @@ const EventModal = ({
                       <MenuItem value="PM">PM</MenuItem>
                     </Select>
                   </FormControl>
+                  
+                  <Tooltip 
+                    title="Timezone for reminders can be updated in settings."
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton 
+                      size="small" 
+                      sx={{ color: 'text.secondary' }}
+                    >
+                      <InfoIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </div>
 
                 {/* Reminder For Selector */}

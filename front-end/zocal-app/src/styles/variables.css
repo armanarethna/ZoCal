@@ -67,10 +67,10 @@
   --calendar-khordad-saal-bg-dark: #ff8a50;
   --calendar-zarthost-bg-light: #8d6e63;    /* Brown for Zarthost no Diso */
   --calendar-zarthost-bg-dark: #5d4037;
-  --calendar-muktad-bg-light: #e6ccff;      /* Light lavender for Muktad */
-  --calendar-muktad-bg-dark: #b19cd9;
-  --calendar-jashan-border-light: #8d6e63;  /* Brown border for Jashans */
-  --calendar-jashan-border-dark: #5d4037;
+  --calendar-muktad-bg-light: #ffc0e0;      /* Light pink for Muktad */
+  --calendar-muktad-bg-dark: #ff69b4;
+  --calendar-jashan-border-light: #4caf50;  /* Green border for Jashans */
+  --calendar-jashan-border-dark: #388e3c;
   --calendar-first-day-border-light: #ffc107; /* Yellow border for first day of month */
   --calendar-first-day-border-dark: #ff8f00;
 

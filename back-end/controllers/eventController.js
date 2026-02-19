@@ -63,8 +63,8 @@ const createEvent = [
 
   body('reminder_days')
     .optional()
-    .isIn([0, 1, 3, 7, 30])
-    .withMessage('Reminder days must be 0, 1, 3, 7, or 30'),
+    .isIn([-1, 0, 1, 3, 7, 30])
+    .withMessage('Reminder days must be -1 (No Reminder), 0 (On The Day), 1, 3, 7, or 30'),
 
   body('reminder_time_hour')
     .optional()
@@ -165,8 +165,8 @@ const updateEvent = [
 
   body('reminder_days')
     .optional()
-    .isIn([0, 1, 3, 7, 30])
-    .withMessage('Reminder days must be 0, 1, 3, 7, or 30'),
+    .isIn([-1, 0, 1, 3, 7, 30])
+    .withMessage('Reminder days must be -1 (No Reminder), 0 (On The Day), 1, 3, 7, or 30'),
 
   body('reminder_time_hour')
     .optional()
@@ -208,7 +208,7 @@ const handleCreateEvent = async (req, res) => {
       category: finalCategory,
       eventDate: new Date(eventDate),
       beforeSunrise,
-      reminder_days: reminder_days || 0,
+      reminder_days: reminder_days !== undefined ? reminder_days : -1,
       reminder_time_hour: reminder_time_hour || 12,
       reminder_time_ampm: reminder_time_ampm || 'PM',
       reminder_for: reminder_for || 'Zoroastrian',
@@ -218,7 +218,7 @@ const handleCreateEvent = async (req, res) => {
     await event.save();
 
     // Send immediate reminder if event is within reminder period
-    if (reminder_days && reminder_days > 0) {
+    if (reminder_days !== undefined && reminder_days >= 0) {
       try {
         const reminderScheduler = require('../utils/reminderScheduler');
         const user = await User.findById(req.user.userId);
@@ -387,7 +387,7 @@ const handleUpdateEvent = async (req, res) => {
     await event.save();
 
     // Send immediate reminder if reminder_days was updated and event is within reminder period
-    if (reminder_days !== undefined && reminder_days > 0) {
+    if (reminder_days !== undefined && reminder_days >= 0) {
       try {
         const reminderScheduler = require('../utils/reminderScheduler');
         const user = await User.findById(req.user.userId);

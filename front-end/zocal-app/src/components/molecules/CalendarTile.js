@@ -67,8 +67,6 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   };
 
   const getCalendarTileBorderColor = () => {
-    if (isDayToday) return 'primary.dark';
-    
     // Only apply special borders for tiles in current month
     if (isCurrentMonth) {
       switch (dayType) {
@@ -85,8 +83,6 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   };
 
   const getCalendarTileBorderWidth = () => {
-    if (isDayToday) return 2;
-    
     // Only apply special borders for tiles in current month
     if (isCurrentMonth) {
       switch (dayType) {
@@ -109,9 +105,10 @@ const CalendarTile = ({ dayObj, calendarType }) => {
       dayType={dayType}
       open={isMobile ? tooltipOpen : undefined}
       onClose={handleTooltipClose}
+      isToday={isDayToday}
     >
       <Card 
-        elevation={isDayToday ? 3 : 1}
+        elevation={1}
         onClick={handleMobileClick}
         sx={{ 
           minHeight: isMobile ? 45 : 75,
@@ -146,15 +143,20 @@ const CalendarTile = ({ dayObj, calendarType }) => {
             {/* Gregorian Date */}
             <Typography 
               variant={isMobile ? "body2" : "h6"} 
-              fontWeight={isDayToday ? 'bold' : 'normal'}
               color={shouldHaveWhiteText ? 'var(--color-white)' : 'var(--primary-main)'}
               align="center"
               sx={{ 
                 mb: isMobile ? 0.25 : 0.5,
                 fontSize: isMobile ? '0.75rem' : '1.25rem',
-                lineHeight: 1
+                lineHeight: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
+              {isDayToday && (
+                <span style={{ color: 'red', fontSize: '1.5em', marginRight: '4px', lineHeight: 0 }}>•</span>
+              )}
               {format(date, 'd')}
             </Typography>
             
@@ -162,7 +164,6 @@ const CalendarTile = ({ dayObj, calendarType }) => {
             <Typography 
               variant="caption" 
               display="block"
-              fontWeight={isDayToday ? 'bold' : 'normal'}
               color={shouldHaveWhiteText ? 'white' : 'text.primary'}
               align="center"
               sx={{ 

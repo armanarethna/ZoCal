@@ -38,13 +38,14 @@ const eventSchema = new mongoose.Schema({
   },
 
   // Email reminder settings - days before event to send reminder
+  // -1 = No Reminder, 0 = On The Day, 1/3/7/30 = Days before
   reminder_days: {
     type: Number,
     enum: {
-      values: [0, 1, 3, 7, 30],
-      message: 'Reminder days must be 0, 1, 3, 7, or 30'
+      values: [-1, 0, 1, 3, 7, 30],
+      message: 'Reminder days must be -1, 0, 1, 3, 7, or 30'
     },
-    default: 0
+    default: -1
   },
   
   // Reminder time settings

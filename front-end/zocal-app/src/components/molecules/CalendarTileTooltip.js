@@ -23,7 +23,8 @@ const CalendarTileTooltip = ({
   specialDateInfo,
   dayType,
   open, 
-  onClose 
+  onClose,
+  isToday
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -75,6 +76,13 @@ const CalendarTileTooltip = ({
           <Typography variant="body2" sx={{ mb: 0.5 }}>
             Mah: {zoroastrianDate.mah} ({mahMeaning})
           </Typography>
+          
+          {/* Today Indicator */}
+          {isToday && (
+            <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 1, mb: 0.5 }}>
+              Today
+            </Typography>
+          )}
           
           {/* Special Date Information */}
           {(specialDateInfo || dayType === 'Muktad') && (

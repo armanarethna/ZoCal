@@ -293,10 +293,6 @@ export const sortEventsByZoroastrianOccurrence = (events, calendarType) => {
 
 // Get special date information for Zoroastrian dates
 export const getSpecialDateInfo = (zoroastrianDate, gregorianDate, calendarType) => {
-  if (zoroastrianDate.isGatha) {
-    return null; // Gatha days are handled separately
-  }
-
   const { roj, mah, rojIndex, mahIndex } = zoroastrianDate;
 
   // Check special dates in priority order
@@ -345,20 +341,28 @@ export const getSpecialDateInfo = (zoroastrianDate, gregorianDate, calendarType)
     }
   }
 
-  // 5. Jashans: When Roj and Mah match
-  if (roj === mah) {
+  // 5. Gatha days
+  if (zoroastrianDate.isGatha) {
     return {
-      name: 'Jashan',
-      description: null,
-      type: 'jashan',
-      border: 'brown'
+      type: 'Gatha',
+      color: 'purple'
     };
   }
 
-  // 6. First day of month: Hormazd roj of each month
+  // 6. Jashans: When Roj and Mah match
+  if (roj === mah) {
+    return {
+      name: `${roj} Jashan`,
+      description: null,
+      type: 'jashan',
+      border: 'green'
+    };
+  }
+
+  // 7. First day of month: Hormazd roj of each month
   if (rojIndex === 0 && mahIndex > 0) { // Hormazd roj, but not Fravardin mah (already covered by Nowruz)
     return {
-      name: 'First day of month',
+      name: `First day of ${mah} mah`,
       description: null,
       type: 'first-day-month',
       border: 'yellow'

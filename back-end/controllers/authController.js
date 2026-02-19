@@ -84,7 +84,12 @@ const updateSettings = [
   body('default_zoro_cal')
     .optional()
     .isIn(['Shenshai', 'Kadmi', 'Fasli'])
-    .withMessage('Default Zoroastrian calendar must be Shenshai, Kadmi, or Fasli')
+    .withMessage('Default Zoroastrian calendar must be Shenshai, Kadmi, or Fasli'),
+  
+  body('timezone')
+    .optional()
+    .isString()
+    .withMessage('Timezone must be a valid string')
 ];
 
 // =============================================
@@ -410,9 +415,10 @@ const handleUpdateUserSettings = async (req, res) => {
     }
 
     // Update settings fields
-    const { display_mode, default_zoro_cal } = req.body;
+    const { display_mode, default_zoro_cal, timezone } = req.body;
     if (display_mode) user.display_mode = display_mode;
     if (default_zoro_cal) user.default_zoro_cal = default_zoro_cal;
+    if (timezone) user.timezone = timezone;
 
     await user.save();
 
