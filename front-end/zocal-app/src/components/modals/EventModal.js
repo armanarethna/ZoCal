@@ -17,14 +17,19 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Typography
+  Typography,
+  Tooltip,
+  IconButton,
+  Box
 } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { createEvent, updateEvent, deleteEvent, clearError as clearEventsError } from '../../store/eventsSlice';
 import { validateEventDate } from '../../utils/eventUtils';
+import { TOOLTIP_TEXT } from '../../constants';
 
 const EventModal = ({ 
   open, 
@@ -252,31 +257,58 @@ const EventModal = ({
               minDate={new Date(new Date().getFullYear() - 100, 0, 1)}
             />
             
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={eventFormData.beforeSunrise}
-                  onChange={(e) => handleEventFormChange('beforeSunrise', e.target.checked)}
-                />
-              }
-              label="Before Sunrise"
-              sx={{ mt: 1, display: 'block' }}
-            />
-
-            <FormControl fullWidth margin="normal" sx={{ mt: 2 }}>
-              <InputLabel>Email Reminder</InputLabel>
-              <Select
-                value={eventFormData.reminder_days}
-                onChange={(e) => handleEventFormChange('reminder_days', e.target.value)}
-                label="Email Reminder"
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={eventFormData.beforeSunrise}
+                    onChange={(e) => handleEventFormChange('beforeSunrise', e.target.checked)}
+                  />
+                }
+                label="Before Sunrise"
+              />
+              <Tooltip 
+                title={TOOLTIP_TEXT.BEFORE_SUNRISE}
+                arrow
+                placement="top"
               >
-                <MenuItem value={0}>No Reminder</MenuItem>
-                <MenuItem value={1}>1 Day Before</MenuItem>
-                <MenuItem value={3}>3 Days Before</MenuItem>
-                <MenuItem value={7}>1 Week Before</MenuItem>
-                <MenuItem value={30}>1 Month Before</MenuItem>
-              </Select>
-            </FormControl>
+                <IconButton 
+                  size="small" 
+                  sx={{ color: 'text.secondary', p: 0.5 }}
+                >
+                  <InfoIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Email Reminder</InputLabel>
+                <Select
+                  value={eventFormData.reminder_days}
+                  onChange={(e) => handleEventFormChange('reminder_days', e.target.value)}
+                  label="Email Reminder"
+                >
+                  <MenuItem value={0}>No Reminder</MenuItem>
+                  <MenuItem value={1}>1 Day Before</MenuItem>
+                  <MenuItem value={3}>3 Days Before</MenuItem>
+                  <MenuItem value={7}>1 Week Before</MenuItem>
+                  <MenuItem value={30}>1 Month Before</MenuItem>
+                </Select>
+              </FormControl>
+              <Tooltip 
+                title={TOOLTIP_TEXT.REMINDER_INFO}
+                arrow
+                placement="top"
+              >
+                <IconButton 
+                  size="small" 
+                  sx={{ color: 'text.secondary' }}
+                >
+                  <InfoIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
 
             {/* Show additional reminder settings if reminder is enabled */}
             {eventFormData.reminder_days > 0 && (

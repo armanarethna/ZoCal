@@ -179,12 +179,13 @@ export const DEFAULT_ZORO_CAL_OPTIONS = {
 // Tooltip text for various components
 export const TOOLTIP_TEXT = {
   ROJ_CALCULATOR: `Convert Gregorian dates to the Zoroastrian calendar system. 
-    The calculator determines the Roj (day name) and Mah (month name) according to the selected calendar type. 
-    Use 'Before sunrise' option if the time is before sunrise on the selected date, as Zoroastrian days begin at sunrise.`,
-  EVENTS_TAB: `The Events tab displays your saved events including calculated Zoroastrian calendar details. 
+    The calculator determines Zoroastrian details based on date and selected calendar type. 
+    'Before sunrise' option is provided, as Zoroastrian days begin at sunrise.`,
+  EVENTS_TAB: `The Events tab displays your saved events with both Gregorian and Zoroastrian details. 
     Events are sorted by their next occurrence date for Zoroastrian event date. 
-    Calendar type determines which Zoroastrian calendar system is used. 
-    Roj (day name) and Mah (month name) are determined based on the event date and selected calendar type.`
+    Calendar type determines which Zoroastrian calendar system is used.`,
+  BEFORE_SUNRISE: `'Before sunrise' option is provided, as Zoroastrian days begin at sunrise.`,
+  REMINDER_INFO: `Reminders will be sent to the registered email address at selected time (timezone can be changed in settings). Reminder email will also contain calendar link to add to google calendar. Reminders can be set up for Gregorian, Zoroastrian or both events.`
 };
 
 // =============================================
