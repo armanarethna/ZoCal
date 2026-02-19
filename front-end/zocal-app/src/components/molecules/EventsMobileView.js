@@ -68,7 +68,7 @@ const EventsMobileView = ({
                       {event.name}
                     </Typography>
                     <Typography variant="body2">
-                      {event.category} ({calculateYears(event.eventDate)}{calculateYears(event.eventDate) === 1 ? 'st' : calculateYears(event.eventDate) === 2 ? 'nd' : calculateYears(event.eventDate) === 3 ? 'rd' : 'th'})
+                      {event.category} ({calculateYears(event.eventDate)} years)
                     </Typography>
                     <Typography variant="body2">
                       {formatDisplayDate(event.eventDate)}
