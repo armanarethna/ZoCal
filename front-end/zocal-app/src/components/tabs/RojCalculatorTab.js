@@ -19,7 +19,7 @@ import {
   useTheme
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import { gregorianToZoroastrian, calendarTypes } from '../../utils/zoroastrianCalendar';
+import { gregorianToZoroastrian, calendarTypes, getSpecialDateInfo, zoroDayType } from '../../utils/zoroastrianCalendar';
 import CalendarInfoBox from '../molecules/CalendarInfoBox';
 import { 
   setRojCalendarType,
@@ -126,6 +126,15 @@ const RojCalculatorTab = () => {
     if (!isValidDate) return ['Invalid Date Input'];
     if (!result) return [''];
     
+    // Recreate the date used for calculation to get special date info
+    let dateUsed = null;
+    if (selectedDate) {
+      dateUsed = new Date(selectedDate);
+      if (beforeSunrise) {
+        dateUsed.setDate(dateUsed.getDate() - 1);
+      }
+    }
+    
     if (result.isGatha) {
       const gathaIndex = GATHA_NAMES.indexOf(result.roj);
       const gathaDescription = gathaIndex !== -1 ? GATHA_MEANINGS[gathaIndex] : '';
@@ -137,10 +146,27 @@ const RojCalculatorTab = () => {
       const rojMeaning = rojIndex !== -1 ? ROJ_MEANINGS[rojIndex] : '';
       const mahMeaning = mahIndex !== -1 ? MAH_MEANINGS[mahIndex] : '';
       
-      return [
+      const resultLines = [
         `Roj: ${result.roj} (${rojMeaning})`,
         `Mah: ${result.mah} (${mahMeaning})`
       ];
+      
+      // Add special date information if available
+      if (dateUsed) {
+        const dayType = zoroDayType(result, dateUsed, calendarType);
+        const specialDateInfo = getSpecialDateInfo(result, dateUsed, calendarType);
+        
+        if (dayType === 'Muktad') {
+          resultLines.push('Special Date: Muktad');
+        } else if (specialDateInfo) {
+          const specialText = specialDateInfo.description 
+            ? `${specialDateInfo.name}- ${specialDateInfo.description}`
+            : specialDateInfo.name;
+          resultLines.push(`Special Date: ${specialText}`);
+        }
+      }
+      
+      return resultLines;
     }
   };
 

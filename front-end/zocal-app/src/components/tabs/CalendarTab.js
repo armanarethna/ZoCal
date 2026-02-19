@@ -132,6 +132,8 @@ const CalendarTab = () => {
         }}
       >
         {isMobile ? 'Click on' : 'Hover over'} any date to get more detailed Zoroastrian date information.
+        <br />
+        Special dates have different tile or border color.
       </Typography>
 
       {/* Calendar Grid */}
