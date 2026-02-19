@@ -20,6 +20,8 @@ const ZoroastrianTooltip = ({
   children, 
   date, 
   zoroastrianDate, 
+  specialDateInfo,
+  dayType,
   open, 
   onClose 
 }) => {
@@ -73,6 +75,27 @@ const ZoroastrianTooltip = ({
           <Typography variant="body2" sx={{ mb: 0.5 }}>
             Mah: {zoroastrianDate.mah} ({mahMeaning})
           </Typography>
+          
+          {/* Special Date Information */}
+          {(specialDateInfo || dayType === 'Muktad') && (
+            <>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5, mt: 1 }}>
+                Special Date:
+              </Typography>
+              {dayType === 'Muktad' ? (
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  Muktad
+                </Typography>
+              ) : specialDateInfo && (
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  {specialDateInfo.description 
+                    ? `${specialDateInfo.name}: ${specialDateInfo.description}`
+                    : specialDateInfo.name
+                  }
+                </Typography>
+              )}
+            </>
+          )}
         </Box>
       );
     }

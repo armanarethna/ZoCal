@@ -291,21 +291,112 @@ export const sortEventsByZoroastrianOccurrence = (events, calendarType) => {
   });
 };
 
+// Get special date information for Zoroastrian dates
+export const getSpecialDateInfo = (zoroastrianDate, gregorianDate, calendarType) => {
+  if (zoroastrianDate.isGatha) {
+    return null; // Gatha days are handled separately
+  }
+
+  const { roj, mah, rojIndex, mahIndex } = zoroastrianDate;
+
+  // Check special dates in priority order
+  
+  // 1. Nowruz (Zoroastrian): Roj Hormazd, Mah Fravardin
+  if (rojIndex === 0 && mahIndex === 0) { // Hormazd roj, Fravardin mah
+    return {
+      name: 'Nowruz',
+      description: "New year's day",
+      type: 'nowruz-zoroastrian',
+      color: 'green'
+    };
+  }
+
+  // 2. Khordad Saal: Roj Khordad, Mah Fravardin
+  if (roj === 'Khordad' && mah === 'Fravardin') {
+    return {
+      name: 'Khordad Saal',
+      description: "Zarathushtra's birth",
+      type: 'khordad-saal',
+      color: 'lightgrey'
+    };
+  }
+
+  // 3. Zarthost no Diso: Roj Khorshed, Mah Dae
+  if (roj === 'Khorshed' && mah === 'Dae') {
+    return {
+      name: 'Zarthost no Diso',
+      description: "Zarathushtra's death anniversary",
+      type: 'zarthost-no-diso',
+      color: 'brown'
+    };
+  }
+
+  // 4. Nowruz (Gregorian): 21st March for Shenshai, Kadmi
+  if ((calendarType === 'Shenshai' || calendarType === 'Kadmi') && gregorianDate) {
+    const month = gregorianDate.getMonth();
+    const day = gregorianDate.getDate();
+    if (month === 2 && day === 21) { // March 21 (0-indexed month)
+      return {
+        name: 'Nowruz',
+        description: 'First day of Spring / Spring equinox',
+        type: 'nowruz-gregorian',
+        color: 'green'
+      };
+    }
+  }
+
+  // 5. Jashans: When Roj and Mah match
+  if (roj === mah) {
+    return {
+      name: 'Jashan',
+      description: null,
+      type: 'jashan',
+      border: 'brown'
+    };
+  }
+
+  // 6. First day of month: Hormazd roj of each month
+  if (rojIndex === 0 && mahIndex > 0) { // Hormazd roj, but not Fravardin mah (already covered by Nowruz)
+    return {
+      name: 'First day of month',
+      description: null,
+      type: 'first-day-month',
+      border: 'yellow'
+    };
+  }
+
+  return null;
+};
+
+// Check if a date is in Muktad period (5 days before Gatha, days 356-360)
+export const isMuktadPeriod = (zoroastrianDate, dayInYear) => {
+  if (zoroastrianDate.isGatha) {
+    return false; // Gatha days themselves are not Muktad
+  }
+  
+  // For non-Gatha days, check if we're in days 356-360 (0-indexed would be 355-359)
+  // In the conversion function, dayInYear goes from 0-359 for regular days, then 360+ for Gatha
+  return dayInYear >= 355 && dayInYear <= 359;
+};
+
 // Determine the type of Zoroastrian day
-export const zoroDayType = (zoroastrianDate) => {
+export const zoroDayType = (zoroastrianDate, gregorianDate = null, calendarType = 'Shenshai') => {
   if (zoroastrianDate.isGatha) {
     return 'Gatha';
   }
-  
-  const isFirstRojOfMah = zoroastrianDate.rojIndex === 0;
-  
-  if (isFirstRojOfMah && zoroastrianDate.mahIndex === 0) {
-    return 'Navroze'; // First day of year (Hormazd roj, Fravardin mah)
+
+  // First check for Muktad period (has priority over other special dates)
+  // We need to calculate day in year to check for Muktad
+  const dayInYear = zoroastrianDate.mahIndex * 30 + zoroastrianDate.rojIndex;
+  if (isMuktadPeriod(zoroastrianDate, dayInYear)) {
+    return 'Muktad';
   }
-  
-  if (isFirstRojOfMah && zoroastrianDate.mahIndex > 0) {
-    return 'HormuzRoj'; // First day of other months
+
+  // Check for other special dates
+  const specialDate = getSpecialDateInfo(zoroastrianDate, gregorianDate, calendarType);
+  if (specialDate) {
+    return specialDate.type;
   }
-  
+
   return 'Default';
 };

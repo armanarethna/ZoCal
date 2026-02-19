@@ -60,6 +60,20 @@
   --calendar-gatha-bg-light: #9370DB;
   --calendar-gatha-bg-dark: #6A4C93;
 
+  /* Special Zoroastrian Date Colors */
+  --calendar-nowruz-bg-light: #4caf50;      /* Green for Nowruz */
+  --calendar-nowruz-bg-dark: #388e3c;
+  --calendar-khordad-saal-bg-light: #d3d3d3;  /* Light grey for Khordad Saal */
+  --calendar-khordad-saal-bg-dark: #757575;
+  --calendar-zarthost-bg-light: #8d6e63;    /* Brown for Zarthost no Diso */
+  --calendar-zarthost-bg-dark: #5d4037;
+  --calendar-muktad-bg-light: #9e9e9e;      /* Grey for Muktad */
+  --calendar-muktad-bg-dark: #616161;
+  --calendar-jashan-border-light: #8d6e63;  /* Brown border for Jashans */
+  --calendar-jashan-border-dark: #5d4037;
+  --calendar-first-day-border-light: #ffc107; /* Yellow border for first day of month */
+  --calendar-first-day-border-dark: #ff8f00;
+
   /* Gradient Colors */
   --gradient-overlay-light: linear-gradient(rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.02));
   --gradient-overlay-dark: linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02));
@@ -92,6 +106,12 @@
   --divider: var(--divider-light);
   --calendar-header-bg: var(--calendar-header-bg-light);
   --calendar-gatha-bg: var(--calendar-gatha-bg-light);
+  --calendar-nowruz-bg: var(--calendar-nowruz-bg-light);
+  --calendar-khordad-saal-bg: var(--calendar-khordad-saal-bg-light);
+  --calendar-zarthost-bg: var(--calendar-zarthost-bg-light);
+  --calendar-muktad-bg: var(--calendar-muktad-bg-light);
+  --calendar-jashan-border: var(--calendar-jashan-border-light);
+  --calendar-first-day-border: var(--calendar-first-day-border-light);
   --gradient-overlay: var(--gradient-overlay-light);
   --event-card-bg: var(--event-card-bg-light);
 }
@@ -115,6 +135,12 @@
   --divider: var(--divider-dark);
   --calendar-header-bg: var(--calendar-header-bg-dark);
   --calendar-gatha-bg: var(--calendar-gatha-bg-dark);
+  --calendar-nowruz-bg: var(--calendar-nowruz-bg-dark);
+  --calendar-khordad-saal-bg: var(--calendar-khordad-saal-bg-dark);
+  --calendar-zarthost-bg: var(--calendar-zarthost-bg-dark);
+  --calendar-muktad-bg: var(--calendar-muktad-bg-dark);
+  --calendar-jashan-border: var(--calendar-jashan-border-dark);
+  --calendar-first-day-border: var(--calendar-first-day-border-dark);
   --gradient-overlay: var(--gradient-overlay-dark);
   --event-card-bg: var(--event-card-bg-dark);
 }

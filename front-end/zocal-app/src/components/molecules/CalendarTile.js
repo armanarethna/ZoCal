@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { format } from 'date-fns';
-import { gregorianToZoroastrian, zoroDayType } from '../../utils/zoroastrianCalendar';
+import { gregorianToZoroastrian, zoroDayType, getSpecialDateInfo } from '../../utils/zoroastrianCalendar';
 import ZoroastrianTooltip from './ZoroastrianTooltip';
 import { useTooltip } from '../../contexts/TooltipContext';
 
@@ -12,14 +12,19 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   
   const { date, isCurrentMonth, isToday: isDayToday } = dayObj;
   const zoroastrianDate = gregorianToZoroastrian(date, calendarType);
-  const dayType = zoroDayType(zoroastrianDate);
+  const dayType = zoroDayType(zoroastrianDate, date, calendarType);
+  const specialDateInfo = getSpecialDateInfo(zoroastrianDate, date, calendarType);
   
   // Create unique ID for this tile
   const tileId = `${format(date, 'yyyy-MM-dd')}-${calendarType}`;
   const tooltipOpen = isOpen(tileId);
   
   // Check if this tile should have white text (special background colors or active states)
-  const shouldHaveWhiteText = dayType !== 'Default' || (isMobile && tooltipOpen && isCurrentMonth);
+  const shouldHaveWhiteText = dayType === 'Gatha' || 
+                             dayType === 'nowruz-zoroastrian' || 
+                             dayType === 'nowruz-gregorian' || 
+                             dayType === 'zarthost-no-diso' ||
+                             (isMobile && tooltipOpen && isCurrentMonth);
   
   // For desktop hover, we'll handle text color in sx prop since we can't detect hover in JS
   
@@ -43,21 +48,63 @@ const CalendarTile = ({ dayObj, calendarType }) => {
     if (!isCurrentMonth) return 'var(--grey-100)';
     
     switch (dayType) {
-      case 'Navroze':
-        return 'var(--success-light)'; // Green for Navroze (first day of year)
-      case 'HormuzRoj':
-        return 'var(--warning-light)'; // Orange/amber for first day of other months
       case 'Gatha':
         return 'var(--calendar-gatha-bg)';
+      case 'nowruz-zoroastrian':
+      case 'nowruz-gregorian':
+        return 'var(--calendar-nowruz-bg)';
+      case 'khordad-saal':
+        return 'var(--calendar-khordad-saal-bg)';
+      case 'zarthost-no-diso':
+        return 'var(--calendar-zarthost-bg)';
+      case 'Muktad':
+        return 'var(--calendar-muktad-bg)';
       default:
         return 'var(--background-paper)';
     }
+  };
+
+  const getCalendarTileBorderColor = () => {
+    if (isDayToday) return 'primary.dark';
+    
+    // Only apply special borders for tiles in current month
+    if (isCurrentMonth) {
+      switch (dayType) {
+        case 'jashan':
+          return 'var(--calendar-jashan-border)';
+        case 'first-day-month':
+          return 'var(--calendar-first-day-border)';
+        default:
+          return 'divider';
+      }
+    }
+    
+    return 'divider';
+  };
+
+  const getCalendarTileBorderWidth = () => {
+    if (isDayToday) return 2;
+    
+    // Only apply special borders for tiles in current month
+    if (isCurrentMonth) {
+      switch (dayType) {
+        case 'jashan':
+        case 'first-day-month':
+          return 3; // Thicker border for special cases
+        default:
+          return 1;
+      }
+    }
+    
+    return 1;
   };
   
   return (
     <ZoroastrianTooltip
       date={date}
       zoroastrianDate={zoroastrianDate}
+      specialDateInfo={specialDateInfo}
+      dayType={dayType}
       open={isMobile ? tooltipOpen : undefined}
       onClose={handleTooltipClose}
     >
@@ -69,8 +116,8 @@ const CalendarTile = ({ dayObj, calendarType }) => {
           backgroundColor: (isMobile && tooltipOpen && isCurrentMonth) 
             ? 'primary.main' 
             : getCalendarTileBackgroundColor(),
-          border: isDayToday ? 2 : 1,
-          borderColor: isDayToday ? 'primary.dark' : 'divider',
+          border: getCalendarTileBorderWidth(),
+          borderColor: getCalendarTileBorderColor(),
           transition: 'all 0.2s ease-in-out',
           cursor: isMobile && isCurrentMonth ? 'pointer' : 'default',
           '&:hover': {
