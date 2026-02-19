@@ -62,7 +62,7 @@ const EventsMobileView = ({
             <CardContent sx={{ p: 2 }}>
               <Grid container spacing={1}>
                 {/* Column 1: Name, Category, Date (2 lines) */}
-                <Grid item xs={4}>
+                <Grid item xs={5}>
                   <Stack spacing={0.5}>
                     <Typography variant="body2">
                       {event.name}
@@ -80,7 +80,7 @@ const EventsMobileView = ({
                 </Grid>
                 
                 {/* Column 2: Zoroastrian Details */}
-                <Grid item xs={4}>
+                <Grid item xs={5}>
                   <Stack spacing={0.5}>
                     <Typography variant="body2">
                       {zoroEvent.roj} (R)
@@ -98,24 +98,22 @@ const EventsMobileView = ({
                 </Grid>
                 
                 {/* Column 3: Action Buttons */}
-                <Grid item xs={4}>
+                <Grid item xs={2}>
                   <Stack spacing={0.5} alignItems="center" justifyContent="center">
-                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                      <IconButton
-                        size="small"
-                        sx={{ color: 'var(--primary-main)' }}
-                        onClick={() => onEditEvent(event)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => onDeleteEvent(event)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
+                    <IconButton
+                      size="small"
+                      sx={{ color: 'var(--primary-main)' }}
+                      onClick={() => onEditEvent(event)}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => onDeleteEvent(event)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
                   </Stack>
                 </Grid>
               </Grid>
