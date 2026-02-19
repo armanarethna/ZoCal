@@ -5,8 +5,7 @@ import {
   Grid,
   Stack,
   Typography,
-  IconButton,
-  Box
+  IconButton
 } from '@mui/material';
 import {
   Edit as EditIcon,
