@@ -46,16 +46,17 @@ const EventModal = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  // Tooltip state management
-  const [beforeSunriseTooltipOpen, setBeforeSunriseTooltipOpen] = useState(false);
-  const [reminderTooltipOpen, setReminderTooltipOpen] = useState(false);
+  // Tooltip state management - only one tooltip can be open at once
+  const [openTooltipId, setOpenTooltipId] = useState(null);
   const [justOpened, setJustOpened] = useState(null);
 
   // Tooltip handlers for Before Sunrise
   const handleBeforeSunriseTooltipClick = () => {
     if (isMobile) {
-      setBeforeSunriseTooltipOpen(!beforeSunriseTooltipOpen);
-      if (!beforeSunriseTooltipOpen) {
+      if (openTooltipId === 'beforeSunrise') {
+        setOpenTooltipId(null);
+      } else {
+        setOpenTooltipId('beforeSunrise');
         setJustOpened('beforeSunrise');
         setTimeout(() => setJustOpened(null), 100);
       }
@@ -66,14 +67,16 @@ const EventModal = ({
     if (isMobile && justOpened === 'beforeSunrise') {
       return;
     }
-    setBeforeSunriseTooltipOpen(false);
+    setOpenTooltipId(null);
   };
 
   // Tooltip handlers for Reminder
   const handleReminderTooltipClick = () => {
     if (isMobile) {
-      setReminderTooltipOpen(!reminderTooltipOpen);
-      if (!reminderTooltipOpen) {
+      if (openTooltipId === 'reminder') {
+        setOpenTooltipId(null);
+      } else {
+        setOpenTooltipId('reminder');
         setJustOpened('reminder');
         setTimeout(() => setJustOpened(null), 100);
       }
@@ -84,7 +87,7 @@ const EventModal = ({
     if (isMobile && justOpened === 'reminder') {
       return;
     }
-    setReminderTooltipOpen(false);
+    setOpenTooltipId(null);
   };
 
   const [eventFormData, setEventFormData] = useState({
@@ -316,7 +319,7 @@ const EventModal = ({
                 title={TOOLTIP_TEXT.BEFORE_SUNRISE}
                 arrow
                 placement="top"
-                open={isMobile ? beforeSunriseTooltipOpen : undefined}
+                open={isMobile ? openTooltipId === 'beforeSunrise' : undefined}
                 onClose={handleBeforeSunriseTooltipClose}
                 disableHoverListener={isMobile}
                 disableFocusListener={isMobile}
@@ -351,7 +354,7 @@ const EventModal = ({
                 title={TOOLTIP_TEXT.REMINDER_INFO}
                 arrow
                 placement="top"
-                open={isMobile ? reminderTooltipOpen : undefined}
+                open={isMobile ? openTooltipId === 'reminder' : undefined}
                 onClose={handleReminderTooltipClose}
                 disableHoverListener={isMobile}
                 disableFocusListener={isMobile}
