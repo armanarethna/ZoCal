@@ -23,7 +23,9 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   const shouldHaveWhiteText = dayType === 'Gatha' || 
                              dayType === 'nowruz-zoroastrian' || 
                              dayType === 'nowruz-gregorian' || 
+                             dayType === 'khordad-saal' ||
                              dayType === 'zarthost-no-diso' ||
+                             dayType === 'Muktad' ||
                              (isMobile && tooltipOpen && isCurrentMonth);
   
   // For desktop hover, we'll handle text color in sx prop since we can't detect hover in JS

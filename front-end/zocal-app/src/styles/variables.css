@@ -63,12 +63,12 @@
   /* Special Zoroastrian Date Colors */
   --calendar-nowruz-bg-light: #4caf50;      /* Green for Nowruz */
   --calendar-nowruz-bg-dark: #388e3c;
-  --calendar-khordad-saal-bg-light: #d3d3d3;  /* Light grey for Khordad Saal */
-  --calendar-khordad-saal-bg-dark: #757575;
+  --calendar-khordad-saal-bg-light: #ffcc80;  /* Light orange for Khordad Saal */
+  --calendar-khordad-saal-bg-dark: #ff8a50;
   --calendar-zarthost-bg-light: #8d6e63;    /* Brown for Zarthost no Diso */
   --calendar-zarthost-bg-dark: #5d4037;
-  --calendar-muktad-bg-light: #9e9e9e;      /* Grey for Muktad */
-  --calendar-muktad-bg-dark: #616161;
+  --calendar-muktad-bg-light: #e6ccff;      /* Light lavender for Muktad */
+  --calendar-muktad-bg-dark: #b19cd9;
   --calendar-jashan-border-light: #8d6e63;  /* Brown border for Jashans */
   --calendar-jashan-border-dark: #5d4037;
   --calendar-first-day-border-light: #ffc107; /* Yellow border for first day of month */
