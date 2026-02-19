@@ -14,6 +14,7 @@ import MobileCalendarHeader from '../molecules/MobileCalendarHeader';
 import DesktopCalendarHeader from '../molecules/DesktopCalendarHeader';
 import CalendarInfoBox from '../molecules/CalendarInfoBox';
 import { WEEKDAYS_FULL, WEEKDAYS_SHORT, DEFAULTS } from '../../constants';
+import { TooltipProvider } from '../../contexts/TooltipContext';
 
 const CalendarTab = () => {
   const dispatch = useDispatch();
@@ -79,7 +80,8 @@ const CalendarTab = () => {
   const isCurrentMonth = isSameMonth(currentDate, today);
 
   return (
-    <Box sx={{ p: '0' }}>
+    <TooltipProvider>
+      <Box sx={{ p: '0' }}>
       {/* Calendar Header */}
       <Paper 
         elevation={2}
@@ -177,6 +179,7 @@ const CalendarTab = () => {
 
       <CalendarInfoBox calendarType={calendarType} />
     </Box>
+    </TooltipProvider>
   );
 };
 

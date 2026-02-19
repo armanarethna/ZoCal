@@ -28,7 +28,16 @@ import {
   setRojResult,
   setRojIsValidDate
 } from '../../store/calendarSlice';
-import { ZOROASTRIAN_CALENDAR_TYPES, TOOLTIP_TEXT } from '../../constants';
+import { 
+  ZOROASTRIAN_CALENDAR_TYPES, 
+  TOOLTIP_TEXT,
+  ROJ_NAMES,
+  MAH_NAMES,
+  GATHA_NAMES,
+  ROJ_MEANINGS,
+  MAH_MEANINGS,
+  GATHA_MEANINGS
+} from '../../constants';
 
 const RojCalculatorTab = () => {
   const dispatch = useDispatch();
@@ -38,14 +47,24 @@ const RojCalculatorTab = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [justOpened, setJustOpened] = useState(false);
 
   const handleTooltipClick = () => {
     if (isMobile) {
       setTooltipOpen(!tooltipOpen);
+      if (!tooltipOpen) {
+        setJustOpened(true);
+        // Reset the flag after a short delay to allow auto-close prevention
+        setTimeout(() => setJustOpened(false), 100);
+      }
     }
   };
 
   const handleTooltipClose = () => {
+    // Prevent immediate auto-close right after opening on mobile
+    if (isMobile && justOpened) {
+      return;
+    }
     setTooltipOpen(false);
   };
 
@@ -104,24 +123,24 @@ const RojCalculatorTab = () => {
   const maxDate = `${currentYear + 100}-12-31`;
 
   const formatResult = () => {
-    if (!isValidDate) return 'Invalid Date Input';
-    if (!result) return '';
-    
-    if (result.isGatha) {
-      return `${result.roj} (Gatha)`;
-    } else {
-      return `${result.roj} (Roj), ${result.mah} (Mah)`;
-    }
-  };
-
-  const formatResultMobile = () => {
     if (!isValidDate) return ['Invalid Date Input'];
     if (!result) return [''];
     
     if (result.isGatha) {
-      return [`${result.roj} (Gatha)`];
+      const gathaIndex = GATHA_NAMES.indexOf(result.roj);
+      const gathaDescription = gathaIndex !== -1 ? GATHA_MEANINGS[gathaIndex] : '';
+      return [`Gatha: ${result.roj} (${gathaDescription})`];
     } else {
-      return [`${result.roj} (Roj)`, `${result.mah} (Mah)`];
+      const rojIndex = ROJ_NAMES.indexOf(result.roj);
+      const mahIndex = MAH_NAMES.indexOf(result.mah);
+      
+      const rojMeaning = rojIndex !== -1 ? ROJ_MEANINGS[rojIndex] : '';
+      const mahMeaning = mahIndex !== -1 ? MAH_MEANINGS[mahIndex] : '';
+      
+      return [
+        `Roj: ${result.roj} (${rojMeaning})`,
+        `Mah: ${result.mah} (${mahMeaning})`
+      ];
     }
   };
 
@@ -215,37 +234,21 @@ const RojCalculatorTab = () => {
               p: 2,
               mx: -1
             }}>
-              {isMobile ? (
-                <Box sx={{ minHeight: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
-                  {formatResultMobile().map((line, index) => (
-                    <Typography 
-                      key={index}
-                      variant="h6" 
-                      sx={{ 
-                        fontWeight: 'bold', 
-                        color: !isValidDate ? 'error.main' : 'primary.contrastText',
-                        lineHeight: 1.2
-                      }}
-                    >
-                      {line}
-                    </Typography>
-                  ))}
-                </Box>
-              ) : (
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    fontWeight: 'bold', 
-                    color: !isValidDate ? 'error.main' : 'primary.contrastText',
-                    minHeight: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {formatResult()}
-                </Typography>
-              )}
+              <Box sx={{ minHeight: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
+                {formatResult().map((line, index) => (
+                  <Typography 
+                    key={index}
+                    variant={isMobile ? "h6" : "h5"}
+                    sx={{ 
+                      fontWeight: 'bold', 
+                      color: !isValidDate ? 'error.main' : 'primary.contrastText',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    {line}
+                  </Typography>
+                ))}
+              </Box>
             </Box>
           </CardContent>
         </Card>

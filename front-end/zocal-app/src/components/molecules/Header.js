@@ -11,7 +11,9 @@ import {
 import {
   Logout as LogoutIcon,
   Login as LoginIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
 import AuthController from '../auth/AuthController';
 import SettingsModal from '../modals/SettingsModal';
@@ -90,6 +92,19 @@ const Header = ({ darkMode, handleThemeToggle, isAuthenticated, handleLogout }) 
           </>
         ) : (
           <>
+            <IconButton
+              color="inherit"
+              onClick={handleThemeToggle}
+              aria-label="toggle theme"
+              size={isMobile ? "small" : "medium"}
+              sx={{ mr: 2 }}
+            >
+              {darkMode ? (
+                <LightModeIcon fontSize={isMobile ? "small" : "medium"} />
+              ) : (
+                <DarkModeIcon fontSize={isMobile ? "small" : "medium"} />
+              )}
+            </IconButton>
             <Button
               color="inherit"
               startIcon={<LoginIcon />}

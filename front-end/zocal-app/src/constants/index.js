@@ -88,6 +88,70 @@ export const GATHA_NAMES = [
 ];
 
 // =============================================
+// ZOROASTRIAN MEANINGS
+// =============================================
+
+// Meanings for 30 Rojs (Days)
+export const ROJ_MEANINGS = [
+  'lord of wisdom',                    // 1. Hormazd
+  'good mind',                         // 2. Bahman
+  'truth and order',                   // 3. Ardibehesht
+  'dominion',                          // 4. Shehervar
+  'devotion',                          // 5. Aspandard
+  'wholeness or perfection',           // 6. Khordad
+  'immortality',                       // 7. Amardad
+  'day before fire',                   // 8. Dae-pa-Adar
+  'fire',                              // 9. Adar
+  'water',                             // 10. Avan
+  'sun',                               // 11. Khorshed
+  'moon',                              // 12. Mohor
+  'the star of Sirius',                // 13. Tir
+  'cow or soul of life',               // 14. Gosh
+  'day before light',                  // 15. Dae-pa-Meher
+  'light',                             // 16. Meher
+  'paying attention',                  // 17. Srosh
+  'truth',                             // 18. Rashne
+  'guardian angel',                    // 19. Fravardin
+  'victory or triumph over evil',      // 20. Behram
+  'peace or joy',                      // 21. Ram
+  'wind or atmosphere',                // 22. Govad
+  'day before religion',               // 23. Dae-pa-Din
+  'religion',                          // 24. Din
+  'blessings or rewards',              // 25. Ashishvangh
+  'rectitude or justice',              // 26. Ashtad
+  'sky',                               // 27. Asman
+  'earth',                             // 28. Zamyad
+  'holy word',                         // 29. Mareshpand
+  'endless light'                      // 30. Aneran
+];
+
+// Meanings for 12 Mahs (Months)
+export const MAH_MEANINGS = [
+  'guardian angel',                    // 1. Fravardin
+  'truth and order',                   // 2. Ardibehesht
+  'wholeness or perfection',           // 3. Khordad
+  'the star of Sirius',                // 4. Tir
+  'immortality',                       // 5. Amardad
+  'dominion',                          // 6. Shehrevar
+  'light',                             // 7. Meher
+  'water',                             // 8. Avan
+  'fire',                              // 9. Adar
+  'creator',                           // 10. Dae
+  'good mind',                         // 11. Bahman
+  'devotion'                           // 12. Aspandard
+];
+
+// Meanings for Gatha Days
+export const GATHA_MEANINGS = [
+  '1st day of prayers',                // Ahunavaiti
+  '2nd day of prayers',                // Ushtavaiti
+  '3rd day of prayers',                // Spentamainyu
+  '4th day of prayers',                // Vohuxshathra
+  '5th day of prayers',                // Vahishtoishti
+  'leap day prayers'                   // Avardad-sal-Gah
+];
+
+// =============================================
 // USER PREFERENCES
 // =============================================
 

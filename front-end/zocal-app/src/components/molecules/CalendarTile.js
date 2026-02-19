@@ -2,17 +2,42 @@ import React from 'react';
 import { Card, CardContent, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { format } from 'date-fns';
 import { gregorianToZoroastrian, zoroDayType } from '../../utils/zoroastrianCalendar';
+import ZoroastrianTooltip from './ZoroastrianTooltip';
+import { useTooltip } from '../../contexts/TooltipContext';
 
 const CalendarTile = ({ dayObj, calendarType }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { openTooltip, closeTooltip, isOpen } = useTooltip();
   
   const { date, isCurrentMonth, isToday: isDayToday } = dayObj;
   const zoroastrianDate = gregorianToZoroastrian(date, calendarType);
   const dayType = zoroDayType(zoroastrianDate);
   
-  // Check if this tile should have white text (special background colors)
-  const shouldHaveWhiteText = dayType !== 'Default';
+  // Create unique ID for this tile
+  const tileId = `${format(date, 'yyyy-MM-dd')}-${calendarType}`;
+  const tooltipOpen = isOpen(tileId);
+  
+  // Check if this tile should have white text (special background colors or active states)
+  const shouldHaveWhiteText = dayType !== 'Default' || (isMobile && tooltipOpen && isCurrentMonth);
+  
+  // For desktop hover, we'll handle text color in sx prop since we can't detect hover in JS
+  
+  // Handle mobile click
+  const handleMobileClick = () => {
+    if (isMobile && isCurrentMonth) {
+      if (tooltipOpen) {
+        closeTooltip();
+      } else {
+        openTooltip(tileId);
+      }
+    }
+  };
+  
+  // Handle mobile tooltip close
+  const handleTooltipClose = () => {
+    closeTooltip();
+  };
   
   const getCalendarTileBackgroundColor = () => {
     if (!isCurrentMonth) return 'var(--grey-100)';
@@ -30,16 +55,34 @@ const CalendarTile = ({ dayObj, calendarType }) => {
   };
   
   return (
-    <Card 
-      elevation={isDayToday ? 3 : 1}
-      sx={{ 
-        minHeight: isMobile ? 45 : 75,
-        backgroundColor: getCalendarTileBackgroundColor(),
-        border: isDayToday ? 2 : 1,
-        borderColor: isDayToday ? 'primary.dark' : 'divider',
-        transition: 'all 0.2s ease-in-out'
-      }}
+    <ZoroastrianTooltip
+      date={date}
+      zoroastrianDate={zoroastrianDate}
+      open={isMobile ? tooltipOpen : undefined}
+      onClose={handleTooltipClose}
     >
+      <Card 
+        elevation={isDayToday ? 3 : 1}
+        onClick={handleMobileClick}
+        sx={{ 
+          minHeight: isMobile ? 45 : 75,
+          backgroundColor: (isMobile && tooltipOpen && isCurrentMonth) 
+            ? 'primary.main' 
+            : getCalendarTileBackgroundColor(),
+          border: isDayToday ? 2 : 1,
+          borderColor: isDayToday ? 'primary.dark' : 'divider',
+          transition: 'all 0.2s ease-in-out',
+          cursor: isMobile && isCurrentMonth ? 'pointer' : 'default',
+          '&:hover': {
+            transform: isCurrentMonth ? 'scale(1.02)' : 'none',
+            boxShadow: isCurrentMonth ? theme.shadows[4] : theme.shadows[1],
+            backgroundColor: !isMobile && isCurrentMonth ? 'primary.main' : undefined,
+            '& .MuiTypography-root': {
+              color: !isMobile && isCurrentMonth ? 'white !important' : undefined
+            }
+          }
+        }}
+      >
       <CardContent sx={{ 
         p: isMobile ? 0.25 : 0.5, 
         '&:last-child': { pb: isMobile ? 0.25 : 0.5 },
@@ -95,6 +138,7 @@ const CalendarTile = ({ dayObj, calendarType }) => {
         ) : null}
       </CardContent>
     </Card>
+    </ZoroastrianTooltip>
   );
 };
 
