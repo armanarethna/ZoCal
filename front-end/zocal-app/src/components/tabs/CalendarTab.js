@@ -122,6 +122,18 @@ const CalendarTab = () => {
         )}
       </Paper>
 
+      <Typography 
+        variant="body2" 
+        sx={{ 
+          textAlign: 'left', 
+          color: 'text.secondary', 
+          my: 1,
+          px: 1
+        }}
+      >
+        {isMobile ? 'Click on' : 'Hover over'} any date to get more detailed Zoroastrian date information.
+      </Typography>
+
       {/* Calendar Grid */}
       <Paper 
         elevation={3}
