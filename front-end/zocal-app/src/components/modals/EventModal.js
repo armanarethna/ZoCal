@@ -20,7 +20,9 @@ import {
   Typography,
   Tooltip,
   IconButton,
-  Box
+  Box,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -41,6 +43,49 @@ const EventModal = ({
 }) => {
   const dispatch = useDispatch();
   const { loading: eventsLoading } = useSelector(state => state.events);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  // Tooltip state management
+  const [beforeSunriseTooltipOpen, setBeforeSunriseTooltipOpen] = useState(false);
+  const [reminderTooltipOpen, setReminderTooltipOpen] = useState(false);
+  const [justOpened, setJustOpened] = useState(null);
+
+  // Tooltip handlers for Before Sunrise
+  const handleBeforeSunriseTooltipClick = () => {
+    if (isMobile) {
+      setBeforeSunriseTooltipOpen(!beforeSunriseTooltipOpen);
+      if (!beforeSunriseTooltipOpen) {
+        setJustOpened('beforeSunrise');
+        setTimeout(() => setJustOpened(null), 100);
+      }
+    }
+  };
+
+  const handleBeforeSunriseTooltipClose = () => {
+    if (isMobile && justOpened === 'beforeSunrise') {
+      return;
+    }
+    setBeforeSunriseTooltipOpen(false);
+  };
+
+  // Tooltip handlers for Reminder
+  const handleReminderTooltipClick = () => {
+    if (isMobile) {
+      setReminderTooltipOpen(!reminderTooltipOpen);
+      if (!reminderTooltipOpen) {
+        setJustOpened('reminder');
+        setTimeout(() => setJustOpened(null), 100);
+      }
+    }
+  };
+
+  const handleReminderTooltipClose = () => {
+    if (isMobile && justOpened === 'reminder') {
+      return;
+    }
+    setReminderTooltipOpen(false);
+  };
 
   const [eventFormData, setEventFormData] = useState({
     name: editingEvent?.name || '',
@@ -271,10 +316,16 @@ const EventModal = ({
                 title={TOOLTIP_TEXT.BEFORE_SUNRISE}
                 arrow
                 placement="top"
+                open={isMobile ? beforeSunriseTooltipOpen : undefined}
+                onClose={handleBeforeSunriseTooltipClose}
+                disableHoverListener={isMobile}
+                disableFocusListener={isMobile}
+                disableTouchListener={isMobile}
               >
                 <IconButton 
                   size="small" 
                   sx={{ color: 'text.secondary', p: 0.5 }}
+                  onClick={handleBeforeSunriseTooltipClick}
                 >
                   <InfoIcon fontSize="small" />
                 </IconButton>
@@ -300,10 +351,16 @@ const EventModal = ({
                 title={TOOLTIP_TEXT.REMINDER_INFO}
                 arrow
                 placement="top"
+                open={isMobile ? reminderTooltipOpen : undefined}
+                onClose={handleReminderTooltipClose}
+                disableHoverListener={isMobile}
+                disableFocusListener={isMobile}
+                disableTouchListener={isMobile}
               >
                 <IconButton 
                   size="small" 
                   sx={{ color: 'text.secondary' }}
+                  onClick={handleReminderTooltipClick}
                 >
                   <InfoIcon fontSize="small" />
                 </IconButton>
