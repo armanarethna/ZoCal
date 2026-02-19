@@ -105,6 +105,13 @@ const ZoroastrianTooltip = ({
               }
             }
           }
+        },
+        popper: {
+          sx: {
+            '&[data-popper-placement*="top"] .MuiTooltip-tooltip': {
+              marginBottom: '-4px !important'
+            }
+          }
         }
       }}
     >
