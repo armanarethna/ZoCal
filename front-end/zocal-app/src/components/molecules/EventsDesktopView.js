@@ -125,7 +125,7 @@ const EventsDesktopView = ({
                       {event.category}
                     </Typography>
                     <Typography component="div" variant="body1">
-                      ({calculateYears(event.eventDate)} years)
+                      ({calculateYears(event.eventDate)} {calculateYears(event.eventDate) === 1 ? 'year' : 'years'})
                     </Typography>
                   </Box>
                 </TableCell>
