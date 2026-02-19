@@ -45,7 +45,8 @@ const EventsDesktopView = ({
         },
         '& .MuiTableHead .MuiTableCell-root': {
           fontSize: '1.2rem',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          color: 'var(--color-black)'
         },
         '& .action-column': {
           padding: '8px 4px',
@@ -76,17 +77,17 @@ const EventsDesktopView = ({
         <TableHead>
           <TableRow>
             <TableCell className="name-column">
-              <span style={{ color: 'var(--color-white)' }}>Name</span>
+              Name
             </TableCell>
             <TableCell className="category-column">
-              <span style={{ color: 'var(--color-white)' }}>Category</span>
+              Category
             </TableCell>
             <TableCell className="date-column">
-              <span style={{ color: 'var(--color-white)' }}>Date</span>
+              Date
             </TableCell>
             <TableCell className="details-column">{getCalendarTypeDisplayName()} Details</TableCell>
             <TableCell className="fallson-column">
-              <span style={{ color: 'var(--color-white)' }}>Falls On</span>
+              Falls On
             </TableCell>
             <TableCell className="action-column"></TableCell>
             <TableCell className="action-column"></TableCell>
