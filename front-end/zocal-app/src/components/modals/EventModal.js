@@ -90,6 +90,26 @@ const EventModal = ({
     setOpenTooltipId(null);
   };
 
+  // Tooltip handlers for Time Selection
+  const handleTimeSelectionTooltipClick = () => {
+    if (isMobile) {
+      if (openTooltipId === 'timeSelection') {
+        setOpenTooltipId(null);
+      } else {
+        setOpenTooltipId('timeSelection');
+        setJustOpened('timeSelection');
+        setTimeout(() => setJustOpened(null), 100);
+      }
+    }
+  };
+
+  const handleTimeSelectionTooltipClose = () => {
+    if (isMobile && justOpened === 'timeSelection') {
+      return;
+    }
+    setOpenTooltipId(null);
+  };
+
   const [eventFormData, setEventFormData] = useState({
     name: editingEvent?.name || '',
     category: editingEvent?.category || 'Birthday',
@@ -407,10 +427,16 @@ const EventModal = ({
                     title="Timezone for reminders can be updated in settings."
                     arrow
                     placement="top"
+                    open={isMobile ? openTooltipId === 'timeSelection' : undefined}
+                    onClose={handleTimeSelectionTooltipClose}
+                    disableHoverListener={isMobile}
+                    disableFocusListener={isMobile}
+                    disableTouchListener={isMobile}
                   >
                     <IconButton 
                       size="small" 
                       sx={{ color: 'text.secondary' }}
+                      onClick={handleTimeSelectionTooltipClick}
                     >
                       <InfoIcon fontSize="small" />
                     </IconButton>
