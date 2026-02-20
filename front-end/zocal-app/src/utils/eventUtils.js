@@ -16,6 +16,11 @@ export const calculateYears = (eventDate, currentDate = new Date()) => {
   event.setHours(0, 0, 0, 0);
   current.setHours(0, 0, 0, 0);
   
+  // If event is in the future, return 0
+  if (event > current) {
+    return 0;
+  }
+  
   // If today is their birthday (same month and day), return current age
   if (event.getMonth() === current.getMonth() && event.getDate() === current.getDate()) {
     return current.getFullYear() - event.getFullYear();
@@ -43,8 +48,14 @@ export const getNextOccurrence = (eventDate, currentDate = new Date()) => {
   const event = new Date(eventDate);
   const current = new Date(currentDate);
   
-  // Reset current date to start of day for accurate comparison
+  // Reset time to start of day for accurate comparison
+  event.setHours(0, 0, 0, 0);
   current.setHours(0, 0, 0, 0);
+  
+  // If event is in the future, return the event date itself
+  if (event > current) {
+    return event;
+  }
   
   const nextOccurrence = new Date(current.getFullYear(), event.getMonth(), event.getDate());
   nextOccurrence.setHours(0, 0, 0, 0);
@@ -64,11 +75,22 @@ export const getNextOccurrence = (eventDate, currentDate = new Date()) => {
  * @returns {string|number} "Today" if 0 days remaining, otherwise number of days remaining
  */
 export const calculateDaysRemaining = (eventDate, currentDate = new Date()) => {
+  const event = new Date(eventDate);
   const current = new Date(currentDate);
-  const nextOccurrence = getNextOccurrence(eventDate, current);
   
-  // Reset time to start of day for both dates
+  // Reset time to start of day for accurate comparison
+  event.setHours(0, 0, 0, 0);
   current.setHours(0, 0, 0, 0);
+  
+  // If event is in the future, calculate days until that date
+  if (event > current) {
+    const diffTime = event - current;
+    const days = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    return days === 0 ? "Today" : days;
+  }
+  
+  // For past events, calculate next annual occurrence
+  const nextOccurrence = getNextOccurrence(eventDate, current);
   nextOccurrence.setHours(0, 0, 0, 0);
   
   const diffTime = nextOccurrence - current;
@@ -97,7 +119,7 @@ export const formatDisplayDate = (date) => {
 };
 
 /**
- * Check if a date is valid and within the allowed range (today and before, up to 100 years ago)
+ * Check if a date is valid and within the allowed range (up to 100 years ago or 10 years in the future)
  * @param {Date|string} date - The date to validate
  * @returns {object} Validation result with isValid boolean and error message
  */
@@ -106,19 +128,22 @@ export const validateEventDate = (date) => {
     const dateObj = new Date(date);
     const today = new Date();
     const maxPastDate = new Date();
+    const maxFutureDate = new Date();
     maxPastDate.setFullYear(today.getFullYear() - 100);
+    maxFutureDate.setFullYear(today.getFullYear() + 10);
     
     // Set time to start of day for fair comparison
-    today.setHours(23, 59, 59, 999);
+    today.setHours(0, 0, 0, 0);
     dateObj.setHours(0, 0, 0, 0);
     maxPastDate.setHours(0, 0, 0, 0);
+    maxFutureDate.setHours(23, 59, 59, 999);
     
     if (isNaN(dateObj.getTime())) {
       return { isValid: false, error: 'Invalid date format' };
     }
     
-    if (dateObj > today) {
-      return { isValid: false, error: 'Event date cannot be in the future' };
+    if (dateObj > maxFutureDate) {
+      return { isValid: false, error: 'Event date cannot be more than 10 years in the future' };
     }
     
     if (dateObj < maxPastDate) {

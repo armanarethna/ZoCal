@@ -38,15 +38,18 @@ const createEvent = [
       const eventDate = new Date(value);
       const today = new Date();
       const maxPastDate = new Date();
+      const maxFutureDate = new Date();
       maxPastDate.setFullYear(today.getFullYear() - 100);
+      maxFutureDate.setFullYear(today.getFullYear() + 10);
       
       // Set time to start of day for fair comparison
-      today.setHours(23, 59, 59, 999);
+      today.setHours(0, 0, 0, 0);
       eventDate.setHours(0, 0, 0, 0);
       maxPastDate.setHours(0, 0, 0, 0);
+      maxFutureDate.setHours(23, 59, 59, 999);
       
-      if (eventDate > today) {
-        throw new Error('Event date cannot be in the future');
+      if (eventDate > maxFutureDate) {
+        throw new Error('Event date cannot be more than 10 years in the future');
       }
       
       if (eventDate < maxPastDate) {
@@ -139,15 +142,18 @@ const updateEvent = [
         const eventDate = new Date(value);
         const today = new Date();
         const maxPastDate = new Date();
+        const maxFutureDate = new Date();
         maxPastDate.setFullYear(today.getFullYear() - 100);
+        maxFutureDate.setFullYear(today.getFullYear() + 10);
         
         // Set time to start of day for fair comparison
-        today.setHours(23, 59, 59, 999);
+        today.setHours(0, 0, 0, 0);
         eventDate.setHours(0, 0, 0, 0);
         maxPastDate.setHours(0, 0, 0, 0);
+        maxFutureDate.setHours(23, 59, 59, 999);
         
-        if (eventDate > today) {
-          throw new Error('Event date cannot be in the future');
+        if (eventDate > maxFutureDate) {
+          throw new Error('Event date cannot be more than 10 years in the future');
         }
         
         if (eventDate < maxPastDate) {

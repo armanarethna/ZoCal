@@ -198,8 +198,21 @@ export const convertEventToZoroastrian = (event, calendarType) => {
 // Calculate days remaining until next occurrence of Roj/Mah combination
 export const calculateZoroastrianDaysRemaining = (event, calendarType) => {
   try {
-    const zoroEvent = convertEventToZoroastrian(event, calendarType);
+    const eventDate = new Date(event.eventDate);
     const today = new Date();
+    
+    // Reset time to start of day for accurate comparison
+    eventDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    
+    // If event is in the future, calculate days until that date
+    if (eventDate > today) {
+      const diffTime = eventDate - today;
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      return `${diffDays} day${diffDays === 1 ? '' : 's'}`;
+    }
+    
+    const zoroEvent = convertEventToZoroastrian(event, calendarType);
     
     if (zoroEvent.roj === 'N/A') {
       return 'N/A';
@@ -243,6 +256,16 @@ export const calculateNextGregorianDate = (event, calendarType, formatDisplayDat
   try {
     const zoroEvent = convertEventToZoroastrian(event, calendarType);
     const today = new Date();
+    const eventDate = new Date(event.eventDate);
+    
+    // Reset time to start of day for accurate comparison
+    today.setHours(0, 0, 0, 0);
+    eventDate.setHours(0, 0, 0, 0);
+    
+    // If event is in the future, return the event date itself
+    if (eventDate > today) {
+      return formatDisplayDate(eventDate);
+    }
     
     if (zoroEvent.roj === 'N/A') {
       return 'N/A';

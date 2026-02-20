@@ -250,6 +250,16 @@ function calculateNextGregorianDate(event, calendarType) {
   try {
     const zoroEvent = convertEventToZoroastrian(event, calendarType);
     const today = new Date();
+    const eventDate = new Date(event.eventDate);
+    
+    // Reset time to start of day for accurate comparison
+    today.setHours(0, 0, 0, 0);
+    eventDate.setHours(0, 0, 0, 0);
+    
+    // If event is in the future, return the event date itself
+    if (eventDate > today) {
+      return eventDate;
+    }
     
     if (zoroEvent.roj === 'N/A') {
       return null;
@@ -330,8 +340,21 @@ function getZoroastrianDateInfo(gregorianDate, calendarType = 'Shenshai') {
  */
 function calculateZoroastrianDaysRemaining(event, calendarType) {
   try {
-    const zoroEvent = convertEventToZoroastrian(event, calendarType);
+    const eventDate = new Date(event.eventDate);
     const today = new Date();
+    
+    // Reset time to start of day for accurate comparison
+    eventDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    
+    // If event is in the future, calculate days until that date
+    if (eventDate > today) {
+      const diffTime = eventDate - today;
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+    
+    const zoroEvent = convertEventToZoroastrian(event, calendarType);
     
     if (zoroEvent.roj === 'N/A') {
       return -1; // Invalid event
