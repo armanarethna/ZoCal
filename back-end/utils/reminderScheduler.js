@@ -122,25 +122,15 @@ class ReminderScheduler {
           // Calculate days remaining based on reminder_for setting
           if (event.reminder_for === 'Zoroastrian') {
             const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
-            // Send reminder if:
-            // - It's the exact reminder day, OR
-            // - Event is today and reminder_days > 0, OR
-            // - Event is today and reminder_days === 0 (On The Day)
-            if (daysUntilZoroEvent === event.reminder_days || 
-                (daysUntilZoroEvent === 0 && event.reminder_days > 0) ||
-                (daysUntilZoroEvent === 0 && event.reminder_days === 0)) {
+            // Send reminder only if it's the exact reminder day
+            if (daysUntilZoroEvent === event.reminder_days) {
               await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
               remindersSent++;
             }
           } else if (event.reminder_for === 'Gregorian') {
             const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
-            // Send reminder if:
-            // - It's the exact reminder day, OR
-            // - Event is today and reminder_days > 0, OR
-            // - Event is today and reminder_days === 0 (On The Day)
-            if (daysUntilGregorianEvent === event.reminder_days || 
-                (daysUntilGregorianEvent === 0 && event.reminder_days > 0) ||
-                (daysUntilGregorianEvent === 0 && event.reminder_days === 0)) {
+            // Send reminder only if it's the exact reminder day
+            if (daysUntilGregorianEvent === event.reminder_days) {
               await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
               remindersSent++;
             }
@@ -149,23 +139,13 @@ class ReminderScheduler {
             const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
             
             let sent = false;
-            // Send Zoroastrian reminder if:
-            // - It's the exact reminder day, OR
-            // - Event is today and reminder_days > 0, OR
-            // - Event is today and reminder_days === 0 (On The Day)
-            if (daysUntilZoroEvent === event.reminder_days || 
-                (daysUntilZoroEvent === 0 && event.reminder_days > 0) ||
-                (daysUntilZoroEvent === 0 && event.reminder_days === 0)) {
+            // Send Zoroastrian reminder only if it's the exact reminder day
+            if (daysUntilZoroEvent === event.reminder_days) {
               await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
               sent = true;
             }
-            // Send Gregorian reminder if:
-            // - It's the exact reminder day, OR
-            // - Event is today and reminder_days > 0, OR
-            // - Event is today and reminder_days === 0 (On The Day)
-            if (daysUntilGregorianEvent === event.reminder_days || 
-                (daysUntilGregorianEvent === 0 && event.reminder_days > 0) ||
-                (daysUntilGregorianEvent === 0 && event.reminder_days === 0)) {
+            // Send Gregorian reminder only if it's the exact reminder day
+            if (daysUntilGregorianEvent === event.reminder_days) {
               await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
               sent = true;
             }
@@ -225,13 +205,15 @@ class ReminderScheduler {
       if (event.reminder_for === 'Zoroastrian' || event.reminder_for === 'Both') {
         const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
         
-        // Send immediate reminder if:
-        // - reminder_days is 0 (On The Day) and event is today AND reminder time has passed, OR
-        // - reminder_days > 0 and current days to event is less than or equal to reminder_days (and event is in future)
-        const shouldSendToday = (daysUntilZoroEvent === 0 && event.reminder_days === 0 && this.hasReminderTimePassed(event, user));
-        const shouldSendFutureDays = (event.reminder_days > 0 && daysUntilZoroEvent <= event.reminder_days && daysUntilZoroEvent > 0);
+        // Send immediate reminder only if:
+        // - Event is today with "On The Day" reminder AND time has passed, OR
+        // - We're on the reminder day AND time has passed, OR
+        // - We're past the reminder day (late event creation)
+        const shouldSendEventToday = (daysUntilZoroEvent === 0 && event.reminder_days === 0 && this.hasReminderTimePassed(event, user));
+        const shouldSendOnReminderDay = (daysUntilZoroEvent === event.reminder_days && event.reminder_days > 0 && this.hasReminderTimePassed(event, user));
+        const shouldSendLateReminder = (event.reminder_days > 0 && daysUntilZoroEvent < event.reminder_days && daysUntilZoroEvent > 0);
         
-        if (shouldSendToday || shouldSendFutureDays) {
+        if (shouldSendEventToday || shouldSendOnReminderDay || shouldSendLateReminder) {
           console.log(`📧 Sending immediate Zoroastrian reminder for event "${event.name}" - ${daysUntilZoroEvent} days remaining`);
           await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
           sentReminder = true;
@@ -241,13 +223,15 @@ class ReminderScheduler {
       if (event.reminder_for === 'Gregorian' || event.reminder_for === 'Both') {
         const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
         
-        // Send immediate reminder if:
-        // - reminder_days is 0 (On The Day) and event is today AND reminder time has passed, OR
-        // - reminder_days > 0 and current days to event is less than or equal to reminder_days (and event is in future)
-        const shouldSendToday = (daysUntilGregorianEvent === 0 && event.reminder_days === 0 && this.hasReminderTimePassed(event, user));
-        const shouldSendFutureDays = (event.reminder_days > 0 && daysUntilGregorianEvent <= event.reminder_days && daysUntilGregorianEvent > 0);
+        // Send immediate reminder only if:
+        // - Event is today with "On The Day" reminder AND time has passed, OR
+        // - We're on the reminder day AND time has passed, OR
+        // - We're past the reminder day (late event creation)
+        const shouldSendEventToday = (daysUntilGregorianEvent === 0 && event.reminder_days === 0 && this.hasReminderTimePassed(event, user));
+        const shouldSendOnReminderDay = (daysUntilGregorianEvent === event.reminder_days && event.reminder_days > 0 && this.hasReminderTimePassed(event, user));
+        const shouldSendLateReminder = (event.reminder_days > 0 && daysUntilGregorianEvent < event.reminder_days && daysUntilGregorianEvent > 0);
         
-        if (shouldSendToday || shouldSendFutureDays) {
+        if (shouldSendEventToday || shouldSendOnReminderDay || shouldSendLateReminder) {
           console.log(`📧 Sending immediate Gregorian reminder for event "${event.name}" - ${daysUntilGregorianEvent} days remaining`);
           await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
           sentReminder = true;
