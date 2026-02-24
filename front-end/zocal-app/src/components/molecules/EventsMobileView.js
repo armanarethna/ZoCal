@@ -82,10 +82,10 @@ const EventsMobileView = ({
                 <Grid item xs={5}>
                   <Stack spacing={0.5}>
                     <Typography variant="body2">
-                      {zoroEvent.roj} (R)
+                      {zoroEvent.isGatha ? zoroEvent.roj : `${zoroEvent.roj} (R)`}
                     </Typography>
                     <Typography variant="body2">
-                      {zoroEvent.isGatha ? 'GATHA (M)' : `${zoroEvent.mah} (M)`}
+                      {zoroEvent.isGatha ? 'GATHA' : `${zoroEvent.mah} (M)`}
                     </Typography>
                     <Typography variant="body2">
                       {fallsOnText}

@@ -142,10 +142,10 @@ const EventsDesktopView = ({
                 <TableCell className="details-column">
                   <Box>
                     <Typography component="div" variant="body1">
-                      {zoroEvent.roj} (R)
+                      {zoroEvent.isGatha ? zoroEvent.roj : `${zoroEvent.roj} (R)`}
                     </Typography>
                     <Typography component="div" variant="body1">
-                      {zoroEvent.isGatha ? 'GATHA (M)' : `${zoroEvent.mah} (M)`}
+                      {zoroEvent.isGatha ? 'GATHA' : `${zoroEvent.mah} (M)`}
                     </Typography>
                   </Box>
                 </TableCell>
