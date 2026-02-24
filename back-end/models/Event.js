@@ -56,6 +56,13 @@ const eventSchema = new mongoose.Schema({
     default: 12
   },
   
+  reminder_time_minute: {
+    type: Number,
+    min: [0, 'Minute must be between 0 and 59'],
+    max: [59, 'Minute must be between 0 and 59'],
+    default: 0
+  },
+  
   reminder_time_ampm: {
     type: String,
     enum: {

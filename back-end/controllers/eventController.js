@@ -179,6 +179,11 @@ const updateEvent = [
     .isInt({ min: 1, max: 12 })
     .withMessage('Reminder time hour must be between 1 and 12'),
 
+  body('reminder_time_minute')
+    .optional()
+    .isInt({ min: 0, max: 59 })
+    .withMessage('Reminder time minute must be between 0 and 59'),
+
   body('reminder_time_ampm')
     .optional()
     .isIn(['AM', 'PM'])
@@ -203,7 +208,7 @@ const handleCreateEvent = async (req, res) => {
       return res.status(400).json(errorResponse('Validation errors', errors.array()));
     }
 
-    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_ampm, reminder_for } = req.body;
+    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_minute, reminder_time_ampm, reminder_for } = req.body;
 
     // Use custom category if provided and category is "Other"
     const finalCategory = (category === 'Other' && customCategory) ? customCategory : category;
@@ -216,6 +221,7 @@ const handleCreateEvent = async (req, res) => {
       beforeSunrise,
       reminder_days: reminder_days !== undefined ? reminder_days : -1,
       reminder_time_hour: reminder_time_hour || 12,
+      reminder_time_minute: reminder_time_minute !== undefined ? reminder_time_minute : 0,
       reminder_time_ampm: reminder_time_ampm || 'PM',
       reminder_for: reminder_for || 'Zoroastrian',
       createdBy: req.user.userId
@@ -375,7 +381,7 @@ const handleUpdateEvent = async (req, res) => {
     }
 
     // Update fields
-    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_ampm, reminder_for } = req.body;
+    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_minute, reminder_time_ampm, reminder_for } = req.body;
     
     if (name !== undefined) event.name = name;
     if (category !== undefined) {
@@ -387,6 +393,7 @@ const handleUpdateEvent = async (req, res) => {
     if (beforeSunrise !== undefined) event.beforeSunrise = beforeSunrise;
     if (reminder_days !== undefined) event.reminder_days = reminder_days;
     if (reminder_time_hour !== undefined) event.reminder_time_hour = reminder_time_hour;
+    if (reminder_time_minute !== undefined) event.reminder_time_minute = reminder_time_minute;
     if (reminder_time_ampm !== undefined) event.reminder_time_ampm = reminder_time_ampm;
     if (reminder_for !== undefined) event.reminder_for = reminder_for;
 

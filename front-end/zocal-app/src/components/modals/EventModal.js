@@ -118,6 +118,7 @@ const EventModal = ({
     beforeSunrise: editingEvent?.beforeSunrise || false,
     reminder_days: editingEvent?.reminder_days !== undefined ? editingEvent.reminder_days : -1,
     reminder_time_hour: editingEvent?.reminder_time_hour || 12,
+    reminder_time_minute: editingEvent?.reminder_time_minute !== undefined ? editingEvent.reminder_time_minute : 0,
     reminder_time_ampm: editingEvent?.reminder_time_ampm || 'PM',
     reminder_for: editingEvent?.reminder_for || 'Zoroastrian'
   });
@@ -136,6 +137,7 @@ const EventModal = ({
         beforeSunrise: editingEvent.beforeSunrise,
         reminder_days: editingEvent.reminder_days !== undefined ? editingEvent.reminder_days : -1,
         reminder_time_hour: editingEvent.reminder_time_hour || 12,
+        reminder_time_minute: editingEvent.reminder_time_minute !== undefined ? editingEvent.reminder_time_minute : 0,
         reminder_time_ampm: editingEvent.reminder_time_ampm || 'PM',
         reminder_for: editingEvent.reminder_for || 'Zoroastrian'
       });
@@ -148,6 +150,7 @@ const EventModal = ({
         beforeSunrise: false,
         reminder_days: -1,
         reminder_time_hour: 12,
+        reminder_time_minute: 0,
         reminder_time_ampm: 'PM',
         reminder_for: 'Zoroastrian'
       });
@@ -219,6 +222,7 @@ const EventModal = ({
         beforeSunrise: eventFormData.beforeSunrise,
         reminder_days: eventFormData.reminder_days,
         reminder_time_hour: eventFormData.reminder_time_hour,
+        reminder_time_minute: eventFormData.reminder_time_minute,
         reminder_time_ampm: eventFormData.reminder_time_ampm,
         reminder_for: eventFormData.reminder_for
       };
@@ -396,16 +400,31 @@ const EventModal = ({
               <>
                 {/* Reminder Time Selector */}
                 <div style={{ display: 'flex', gap: '16px', marginTop: '16px', alignItems: 'center' }}>
-                  <FormControl sx={{ minWidth: 120, flex: 1 }}>
-                    <InputLabel>Reminder Time</InputLabel>
+                  <FormControl sx={{ minWidth: 80, flex: 1 }}>
+                    <InputLabel>Hour</InputLabel>
                     <Select
                       value={eventFormData.reminder_time_hour}
                       onChange={(e) => handleEventFormChange('reminder_time_hour', e.target.value)}
-                      label="Reminder Time"
+                      label="Hour"
                     >
                       {[...Array(12)].map((_, i) => (
                         <MenuItem key={i + 1} value={i + 1}>
                           {i + 1}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl sx={{ minWidth: 80, flex: 1 }}>
+                    <InputLabel>Minute</InputLabel>
+                    <Select
+                      value={eventFormData.reminder_time_minute}
+                      onChange={(e) => handleEventFormChange('reminder_time_minute', e.target.value)}
+                      label="Minute"
+                    >
+                      {[...Array(60)].map((_, i) => (
+                        <MenuItem key={i} value={i}>
+                          {String(i).padStart(2, '0')}
                         </MenuItem>
                       ))}
                     </Select>

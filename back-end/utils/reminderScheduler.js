@@ -16,16 +16,16 @@ class ReminderScheduler {
     console.log('📅 ReminderScheduler initialized');
   }
 
-  // Start the scheduler - runs every hour
+  // Start the scheduler - runs every minute
   start() {
     if (this.isRunning) {
       console.log('⚠️ Reminder scheduler is already running');
       return;
     }
 
-    // Schedule to run every hour (0 * * * *)
-    this.scheduledJob = cron.schedule('0 * * * *', async () => {
-      console.log('🔄 Running hourly reminder check...');
+    // Schedule to run every minute (* * * * *)
+    this.scheduledJob = cron.schedule('* * * * *', async () => {
+      console.log('🔄 Running minute-based reminder check...');
       await this.checkAndSendReminders();
     }, {
       scheduled: false,
@@ -34,7 +34,7 @@ class ReminderScheduler {
 
     this.scheduledJob.start();
     this.isRunning = true;
-    console.log('✅ Reminder scheduler started - will run every hour');
+    console.log('✅ Reminder scheduler started - will run every minute');
   }
 
   // Stop the scheduler
@@ -54,6 +54,7 @@ class ReminderScheduler {
     // Get current time in user's timezone
     const userTime = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
     const currentHour = userTime.getHours();
+    const currentMinute = userTime.getMinutes();
     
     // Convert reminder time to 24-hour format
     let reminderHour = event.reminder_time_hour;
@@ -63,7 +64,9 @@ class ReminderScheduler {
       reminderHour = 0;
     }
     
-    return currentHour === reminderHour;
+    const reminderMinute = event.reminder_time_minute || 0;
+    
+    return currentHour === reminderHour && currentMinute === reminderMinute;
   }
 
   // Calculate days remaining for Gregorian calendar
@@ -193,6 +196,7 @@ class ReminderScheduler {
     // Get current time in user's timezone
     const userTime = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
     const currentHour = userTime.getHours();
+    const currentMinute = userTime.getMinutes();
     
     // Convert reminder time to 24-hour format
     let reminderHour = event.reminder_time_hour;
@@ -202,7 +206,10 @@ class ReminderScheduler {
       reminderHour = 0;
     }
     
-    return currentHour > reminderHour;
+    const reminderMinute = event.reminder_time_minute || 0;
+    
+    // Time has passed if current hour is greater, or same hour but minute is greater
+    return currentHour > reminderHour || (currentHour === reminderHour && currentMinute > reminderMinute);
   }
 
   // Send immediate reminder for newly created events (if within reminder period)
@@ -219,10 +226,12 @@ class ReminderScheduler {
         const daysUntilZoroEvent = calculateZoroastrianDaysRemaining(event, user.default_zoro_cal);
         
         // Send immediate reminder if:
-        // - reminder_days is 0 (On The Day) and event is today, OR
-        // - reminder_days > 0 and current days to event is less than or equal to reminder_days
-        if ((event.reminder_days === 0 && daysUntilZoroEvent === 0) ||
-            (event.reminder_days > 0 && daysUntilZoroEvent <= event.reminder_days && daysUntilZoroEvent >= 0)) {
+        // - reminder_days is 0 (On The Day) and event is today AND reminder time has passed, OR
+        // - reminder_days > 0 and current days to event is less than or equal to reminder_days (and event is in future)
+        const shouldSendToday = (daysUntilZoroEvent === 0 && event.reminder_days === 0 && this.hasReminderTimePassed(event, user));
+        const shouldSendFutureDays = (event.reminder_days > 0 && daysUntilZoroEvent <= event.reminder_days && daysUntilZoroEvent > 0);
+        
+        if (shouldSendToday || shouldSendFutureDays) {
           console.log(`📧 Sending immediate Zoroastrian reminder for event "${event.name}" - ${daysUntilZoroEvent} days remaining`);
           await emailService.sendZoroastrianReminderEmail(event, user, daysUntilZoroEvent);
           sentReminder = true;
@@ -233,10 +242,12 @@ class ReminderScheduler {
         const daysUntilGregorianEvent = this.calculateGregorianDaysRemaining(event);
         
         // Send immediate reminder if:
-        // - reminder_days is 0 (On The Day) and event is today, OR
-        // - reminder_days > 0 and current days to event is less than or equal to reminder_days
-        if ((event.reminder_days === 0 && daysUntilGregorianEvent === 0) ||
-            (event.reminder_days > 0 && daysUntilGregorianEvent <= event.reminder_days && daysUntilGregorianEvent >= 0)) {
+        // - reminder_days is 0 (On The Day) and event is today AND reminder time has passed, OR
+        // - reminder_days > 0 and current days to event is less than or equal to reminder_days (and event is in future)
+        const shouldSendToday = (daysUntilGregorianEvent === 0 && event.reminder_days === 0 && this.hasReminderTimePassed(event, user));
+        const shouldSendFutureDays = (event.reminder_days > 0 && daysUntilGregorianEvent <= event.reminder_days && daysUntilGregorianEvent > 0);
+        
+        if (shouldSendToday || shouldSendFutureDays) {
           console.log(`📧 Sending immediate Gregorian reminder for event "${event.name}" - ${daysUntilGregorianEvent} days remaining`);
           await emailService.sendGregorianReminderEmail(event, user, daysUntilGregorianEvent);
           sentReminder = true;
