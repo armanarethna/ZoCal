@@ -13,6 +13,7 @@ class ReminderScheduler {
   constructor() {
     this.isRunning = false;
     this.scheduledJob = null;
+    this.dailyInviteJob = null;
     console.log('📅 ReminderScheduler initialized');
   }
 
@@ -32,9 +33,20 @@ class ReminderScheduler {
       timezone: 'UTC'
     });
 
+    // Schedule daily job for next year invites at 00:01 UTC (0 1 * * *)
+    this.dailyInviteJob = cron.schedule('1 0 * * *', async () => {
+      console.log('📅 Running daily next year calendar invite check...');
+      await this.checkAndSendNextYearInvites();
+    }, {
+      scheduled: false,
+      timezone: 'UTC'
+    });
+
     this.scheduledJob.start();
+    this.dailyInviteJob.start();
     this.isRunning = true;
     console.log('✅ Reminder scheduler started - will run every minute');
+    console.log('✅ Daily invite scheduler started - will run at 00:01 UTC');
   }
 
   // Stop the scheduler
@@ -43,6 +55,10 @@ class ReminderScheduler {
       this.scheduledJob.stop();
       this.isRunning = false;
       console.log('⏹️ Reminder scheduler stopped');
+    }
+    if (this.dailyInviteJob) {
+      this.dailyInviteJob.stop();
+      console.log('⏹️ Daily invite scheduler stopped');
     }
   }
 
@@ -94,6 +110,81 @@ class ReminderScheduler {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     return diffDays;
+  }
+
+  // Check for events that occurred yesterday and send next year's calendar invite
+  async checkAndSendNextYearInvites() {
+    try {
+      console.log('📅 Checking for events that need next year calendar invites...');
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // Find all events with instant invites enabled
+      const eventsWithInvites = await Event.find({
+        send_instant_invite: true
+      }).populate('createdBy');
+      
+      let invitesSent = 0;
+      
+      for (const event of eventsWithInvites) {
+        try {
+          const user = event.createdBy;
+          if (!user) continue;
+          
+          const eventDate = new Date(event.eventDate);
+          
+          // Check for Gregorian calendar invites
+          if (event.instant_invite_for === 'Gregorian' || event.instant_invite_for === 'Both') {
+            // Calculate yesterday's occurrence of this event
+            const yesterdayYear = yesterday.getFullYear();
+            const yesterdayOccurrence = new Date(yesterdayYear, eventDate.getMonth(), eventDate.getDate());
+            yesterdayOccurrence.setHours(0, 0, 0, 0);
+            
+            // If yesterday was the event day, send next year's invite
+            if (yesterdayOccurrence.getTime() === yesterday.getTime()) {
+              console.log(`📧 Event "${event.name}" (Gregorian) occurred yesterday. Sending next year's invite...`);
+              await emailService.sendInstantGregorianInvite(event, user);
+              invitesSent++;
+            }
+          }
+          
+          // Check for Zoroastrian calendar invites
+          if (event.instant_invite_for === 'Zoroastrian' || event.instant_invite_for === 'Both') {
+            // Calculate next Zoroastrian occurrence from today
+            const nextOccurrence = calculateNextGregorianDate(event, user.default_zoro_cal);
+            const nextOccurrenceDate = new Date(nextOccurrence);
+            nextOccurrenceDate.setHours(0, 0, 0, 0);
+            
+            // Calculate days until next occurrence
+            const daysDiff = Math.floor((nextOccurrenceDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Only send if exactly 364 days away (day after annual event) and the occurrence is next year
+            // This ensures we only trigger once, the day after the event occurs
+            if (daysDiff === 364 && nextOccurrenceDate.getFullYear() > today.getFullYear()) {
+              console.log(`📧 Event "${event.name}" (Zoroastrian) occurred yesterday. Sending next year's invite...`);
+              await emailService.sendInstantZoroastrianInvite(event, user);
+              invitesSent++;
+            }
+          }
+          
+        } catch (error) {
+          console.error(`❌ Failed to process next year invite for event ${event.name}:`, error.message);
+        }
+      }
+      
+      if (invitesSent > 0) {
+        console.log(`✅ Next year invite check complete: ${invitesSent} invite(s) sent`);
+      } else {
+        console.log('ℹ️ No events occurred yesterday that need next year invites');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error checking for next year invites:', error.message);
+    }
   }
 
   // Check for events that need reminders and send them

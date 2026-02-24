@@ -82,6 +82,22 @@ const eventSchema = new mongoose.Schema({
     default: 'Zoroastrian'
   },
   
+  // Instant calendar invite settings - send email with calendar invite when event is created/updated
+  send_instant_invite: {
+    type: Boolean,
+    default: false
+  },
+  
+  // What calendar type(s) to send instant invites for
+  instant_invite_for: {
+    type: String,
+    enum: {
+      values: ['Zoroastrian', 'Gregorian', 'Both'],
+      message: 'Instant invite for must be Zoroastrian, Gregorian, or Both'
+    },
+    default: 'Zoroastrian'
+  },
+  
   // User who created this event
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

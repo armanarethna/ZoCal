@@ -82,7 +82,17 @@ const createEvent = [
   body('reminder_for')
     .optional()
     .isIn(['Zoroastrian', 'Gregorian', 'Both'])
-    .withMessage('Reminder for must be Zoroastrian, Gregorian, or Both')
+    .withMessage('Reminder for must be Zoroastrian, Gregorian, or Both'),
+
+  body('send_instant_invite')
+    .optional()
+    .isBoolean()
+    .withMessage('Send instant invite must be a boolean value'),
+
+  body('instant_invite_for')
+    .optional()
+    .isIn(['Zoroastrian', 'Gregorian', 'Both'])
+    .withMessage('Instant invite for must be Zoroastrian, Gregorian, or Both')
 ];
 
 const getAllEvents = [
@@ -192,7 +202,17 @@ const updateEvent = [
   body('reminder_for')
     .optional()
     .isIn(['Zoroastrian', 'Gregorian', 'Both'])
-    .withMessage('Reminder for must be Zoroastrian, Gregorian, or Both')
+    .withMessage('Reminder for must be Zoroastrian, Gregorian, or Both'),
+
+  body('send_instant_invite')
+    .optional()
+    .isBoolean()
+    .withMessage('Send instant invite must be a boolean value'),
+
+  body('instant_invite_for')
+    .optional()
+    .isIn(['Zoroastrian', 'Gregorian', 'Both'])
+    .withMessage('Instant invite for must be Zoroastrian, Gregorian, or Both')
 ];
 
 // =============================================
@@ -208,7 +228,7 @@ const handleCreateEvent = async (req, res) => {
       return res.status(400).json(errorResponse('Validation errors', errors.array()));
     }
 
-    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_minute, reminder_time_ampm, reminder_for } = req.body;
+    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_minute, reminder_time_ampm, reminder_for, send_instant_invite, instant_invite_for } = req.body;
 
     // Use custom category if provided and category is "Other"
     const finalCategory = (category === 'Other' && customCategory) ? customCategory : category;
@@ -224,10 +244,33 @@ const handleCreateEvent = async (req, res) => {
       reminder_time_minute: reminder_time_minute !== undefined ? reminder_time_minute : 0,
       reminder_time_ampm: reminder_time_ampm || 'PM',
       reminder_for: reminder_for || 'Zoroastrian',
+      send_instant_invite: send_instant_invite || false,
+      instant_invite_for: instant_invite_for || 'Zoroastrian',
       createdBy: req.user.userId
     });
 
     await event.save();
+
+    // Send instant calendar invite if requested
+    if (send_instant_invite) {
+      try {
+        const emailService = require('../utils/emailService');
+        const user = await User.findById(req.user.userId);
+        
+        if (instant_invite_for === 'Zoroastrian' || instant_invite_for === 'Both') {
+          await emailService.sendInstantZoroastrianInvite(event, user);
+          console.log(`📧 Instant Zoroastrian invite sent for event: ${event.name}`);
+        }
+        
+        if (instant_invite_for === 'Gregorian' || instant_invite_for === 'Both') {
+          await emailService.sendInstantGregorianInvite(event, user);
+          console.log(`📧 Instant Gregorian invite sent for event: ${event.name}`);
+        }
+      } catch (emailError) {
+        // Don't fail event creation if email fails
+        console.error('Failed to send instant invite:', emailError.message);
+      }
+    }
 
     // Send immediate reminder if event is within reminder period
     if (reminder_days !== undefined && reminder_days >= 0) {
@@ -381,7 +424,11 @@ const handleUpdateEvent = async (req, res) => {
     }
 
     // Update fields
-    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_minute, reminder_time_ampm, reminder_for } = req.body;
+    const { name, category, customCategory, eventDate, beforeSunrise, reminder_days, reminder_time_hour, reminder_time_minute, reminder_time_ampm, reminder_for, send_instant_invite, instant_invite_for } = req.body;
+    
+    // Check if we need to send cancellation emails (when send_instant_invite changes from true to false)
+    const wasSendingInvites = event.send_instant_invite;
+    const previousInviteFor = event.instant_invite_for;
     
     if (name !== undefined) event.name = name;
     if (category !== undefined) {
@@ -396,8 +443,96 @@ const handleUpdateEvent = async (req, res) => {
     if (reminder_time_minute !== undefined) event.reminder_time_minute = reminder_time_minute;
     if (reminder_time_ampm !== undefined) event.reminder_time_ampm = reminder_time_ampm;
     if (reminder_for !== undefined) event.reminder_for = reminder_for;
+    if (send_instant_invite !== undefined) event.send_instant_invite = send_instant_invite;
+    if (instant_invite_for !== undefined) event.instant_invite_for = instant_invite_for;
 
     await event.save();
+
+    // Send calendar cancellations if send_instant_invite was turned off
+    if (wasSendingInvites && send_instant_invite === false) {
+      try {
+        const emailService = require('../utils/emailService');
+        const user = await User.findById(req.user.userId);
+        
+        if (previousInviteFor === 'Zoroastrian' || previousInviteFor === 'Both') {
+          await emailService.sendZoroastrianCancellation(event, user);
+          console.log(`📧 Zoroastrian calendar cancellation sent for updated event: ${event.name}`);
+        }
+        
+        if (previousInviteFor === 'Gregorian' || previousInviteFor === 'Both') {
+          await emailService.sendGregorianCancellation(event, user);
+          console.log(`📧 Gregorian calendar cancellation sent for updated event: ${event.name}`);
+        }
+      } catch (emailError) {
+        // Don't fail event update if email fails
+        console.error('Failed to send cancellation email:', emailError.message);
+      }
+    }
+
+    // Send calendar cancellations if calendar type preference changed (while send_instant_invite remains true)
+    if (wasSendingInvites && send_instant_invite !== false && instant_invite_for !== undefined && instant_invite_for !== previousInviteFor) {
+      try {
+        const emailService = require('../utils/emailService');
+        const user = await User.findById(req.user.userId);
+        
+        // Cancel Zoroastrian if it was previously included but is no longer
+        const wasZoroastrian = previousInviteFor === 'Zoroastrian' || previousInviteFor === 'Both';
+        const isZoroastrian = instant_invite_for === 'Zoroastrian' || instant_invite_for === 'Both';
+        
+        if (wasZoroastrian && !isZoroastrian) {
+          await emailService.sendZoroastrianCancellation(event, user);
+          console.log(`📧 Zoroastrian calendar cancellation sent (changed from ${previousInviteFor} to ${instant_invite_for})`);
+        }
+        
+        // Cancel Gregorian if it was previously included but is no longer
+        const wasGregorian = previousInviteFor === 'Gregorian' || previousInviteFor === 'Both';
+        const isGregorian = instant_invite_for === 'Gregorian' || instant_invite_for === 'Both';
+        
+        if (wasGregorian && !isGregorian) {
+          await emailService.sendGregorianCancellation(event, user);
+          console.log(`📧 Gregorian calendar cancellation sent (changed from ${previousInviteFor} to ${instant_invite_for})`);
+        }
+      } catch (emailError) {
+        // Don't fail event update if email fails
+        console.error('Failed to send cancellation email:', emailError.message);
+      }
+    }
+
+    // Send instant calendar invite if requested (only when send_instant_invite is explicitly set)
+    if (send_instant_invite !== undefined && send_instant_invite) {
+      try {
+        const emailService = require('../utils/emailService');
+        const user = await User.findById(req.user.userId);
+        
+        const inviteFor = instant_invite_for !== undefined ? instant_invite_for : event.instant_invite_for;
+        
+        // When calendar type changes, only send invites for newly added types
+        const wasZoroastrian = previousInviteFor === 'Zoroastrian' || previousInviteFor === 'Both';
+        const wasGregorian = previousInviteFor === 'Gregorian' || previousInviteFor === 'Both';
+        const calendarTypeChanged = instant_invite_for !== undefined && instant_invite_for !== previousInviteFor;
+        
+        if (inviteFor === 'Zoroastrian' || inviteFor === 'Both') {
+          // Only send if re-enabling invites OR it's a newly added calendar type
+          const shouldSendZoroastrian = wasSendingInvites === false || (calendarTypeChanged && !wasZoroastrian);
+          if (shouldSendZoroastrian) {
+            await emailService.sendInstantZoroastrianInvite(event, user);
+            console.log(`📧 Instant Zoroastrian invite sent for updated event: ${event.name}`);
+          }
+        }
+        
+        if (inviteFor === 'Gregorian' || inviteFor === 'Both') {
+          // Only send if re-enabling invites OR it's a newly added calendar type
+          const shouldSendGregorian = wasSendingInvites === false || (calendarTypeChanged && !wasGregorian);
+          if (shouldSendGregorian) {
+            await emailService.sendInstantGregorianInvite(event, user);
+            console.log(`📧 Instant Gregorian invite sent for updated event: ${event.name}`);
+          }
+        }
+      } catch (emailError) {
+        // Don't fail event update if email fails
+        console.error('Failed to send instant invite:', emailError.message);
+      }
+    }
 
     // Send immediate reminder if reminder_days was updated and event is within reminder period
     if (reminder_days !== undefined && reminder_days >= 0) {
@@ -441,6 +576,27 @@ const handleDeleteEvent = async (req, res) => {
 
     if (!event) {
       return res.status(404).json(errorResponse('Event not found'));
+    }
+
+    // Send calendar cancellations if the event had instant invites enabled
+    if (event.send_instant_invite) {
+      try {
+        const emailService = require('../utils/emailService');
+        const user = await User.findById(req.user.userId);
+        
+        if (event.instant_invite_for === 'Zoroastrian' || event.instant_invite_for === 'Both') {
+          await emailService.sendZoroastrianCancellation(event, user);
+          console.log(`📧 Zoroastrian calendar cancellation sent for deleted event: ${event.name}`);
+        }
+        
+        if (event.instant_invite_for === 'Gregorian' || event.instant_invite_for === 'Both') {
+          await emailService.sendGregorianCancellation(event, user);
+          console.log(`📧 Gregorian calendar cancellation sent for deleted event: ${event.name}`);
+        }
+      } catch (emailError) {
+        // Don't fail event deletion if email fails
+        console.error('Failed to send cancellation email:', emailError.message);
+      }
     }
 
     // Delete event

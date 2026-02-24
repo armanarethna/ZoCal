@@ -120,7 +120,9 @@ const EventModal = ({
     reminder_time_hour: editingEvent?.reminder_time_hour || 12,
     reminder_time_minute: editingEvent?.reminder_time_minute !== undefined ? editingEvent.reminder_time_minute : 0,
     reminder_time_ampm: editingEvent?.reminder_time_ampm || 'PM',
-    reminder_for: editingEvent?.reminder_for || 'Zoroastrian'
+    reminder_for: editingEvent?.reminder_for || 'Zoroastrian',
+    send_instant_invite: editingEvent?.send_instant_invite || false,
+    instant_invite_for: editingEvent?.instant_invite_for || 'Zoroastrian'
   });
   const [eventFormErrors, setEventFormErrors] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -139,7 +141,9 @@ const EventModal = ({
         reminder_time_hour: editingEvent.reminder_time_hour || 12,
         reminder_time_minute: editingEvent.reminder_time_minute !== undefined ? editingEvent.reminder_time_minute : 0,
         reminder_time_ampm: editingEvent.reminder_time_ampm || 'PM',
-        reminder_for: editingEvent.reminder_for || 'Zoroastrian'
+        reminder_for: editingEvent.reminder_for || 'Zoroastrian',
+        send_instant_invite: editingEvent.send_instant_invite || false,
+        instant_invite_for: editingEvent.instant_invite_for || 'Zoroastrian'
       });
     } else {
       setEventFormData({
@@ -152,7 +156,9 @@ const EventModal = ({
         reminder_time_hour: 12,
         reminder_time_minute: 0,
         reminder_time_ampm: 'PM',
-        reminder_for: 'Zoroastrian'
+        reminder_for: 'Zoroastrian',
+        send_instant_invite: false,
+        instant_invite_for: 'Zoroastrian'
       });
     }
     setEventFormErrors({});
@@ -224,7 +230,9 @@ const EventModal = ({
         reminder_time_hour: eventFormData.reminder_time_hour,
         reminder_time_minute: eventFormData.reminder_time_minute,
         reminder_time_ampm: eventFormData.reminder_time_ampm,
-        reminder_for: eventFormData.reminder_for
+        reminder_for: eventFormData.reminder_for,
+        send_instant_invite: eventFormData.send_instant_invite,
+        instant_invite_for: eventFormData.instant_invite_for
       };
       
       if (editingEvent) {
@@ -359,124 +367,156 @@ const EventModal = ({
               </Tooltip>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Email Reminder</InputLabel>
-                <Select
-                  value={eventFormData.reminder_days}
-                  onChange={(e) => handleEventFormChange('reminder_days', e.target.value)}
-                  label="Email Reminder"
+            {/* Email Reminder Section */}
+            <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Email Reminder</InputLabel>
+                  <Select
+                    value={eventFormData.reminder_days}
+                    onChange={(e) => handleEventFormChange('reminder_days', e.target.value)}
+                    label="Email Reminder"
+                  >
+                    <MenuItem value={-1}>No Reminder</MenuItem>
+                    <MenuItem value={0}>On The Day</MenuItem>
+                    <MenuItem value={1}>1 Day Before</MenuItem>
+                    <MenuItem value={3}>3 Days Before</MenuItem>
+                    <MenuItem value={7}>1 Week Before</MenuItem>
+                    <MenuItem value={30}>1 Month Before</MenuItem>
+                  </Select>
+                </FormControl>
+                <Tooltip 
+                  title={TOOLTIP_TEXT.REMINDER_INFO}
+                  arrow
+                  placement="top"
+                  open={isMobile ? openTooltipId === 'reminder' : undefined}
+                  onClose={handleReminderTooltipClose}
+                  disableHoverListener={isMobile}
+                  disableFocusListener={isMobile}
+                  disableTouchListener={isMobile}
                 >
-                  <MenuItem value={-1}>No Reminder</MenuItem>
-                  <MenuItem value={0}>On The Day</MenuItem>
-                  <MenuItem value={1}>1 Day Before</MenuItem>
-                  <MenuItem value={3}>3 Days Before</MenuItem>
-                  <MenuItem value={7}>1 Week Before</MenuItem>
-                  <MenuItem value={30}>1 Month Before</MenuItem>
-                </Select>
-              </FormControl>
-              <Tooltip 
-                title={TOOLTIP_TEXT.REMINDER_INFO}
-                arrow
-                placement="top"
-                open={isMobile ? openTooltipId === 'reminder' : undefined}
-                onClose={handleReminderTooltipClose}
-                disableHoverListener={isMobile}
-                disableFocusListener={isMobile}
-                disableTouchListener={isMobile}
-              >
-                <IconButton 
-                  size="small" 
-                  sx={{ color: 'text.secondary' }}
-                  onClick={handleReminderTooltipClick}
-                >
-                  <InfoIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+                  <IconButton 
+                    size="small" 
+                    sx={{ color: 'text.secondary' }}
+                    onClick={handleReminderTooltipClick}
+                  >
+                    <InfoIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              {/* Show additional reminder settings if reminder is enabled */}
+              {eventFormData.reminder_days !== -1 && (
+                <>
+                  {/* Reminder Time Selector */}
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '16px', alignItems: 'center' }}>
+                    <FormControl sx={{ minWidth: 80, flex: 1 }}>
+                      <InputLabel>Hour</InputLabel>
+                      <Select
+                        value={eventFormData.reminder_time_hour}
+                        onChange={(e) => handleEventFormChange('reminder_time_hour', e.target.value)}
+                        label="Hour"
+                      >
+                        {[...Array(12)].map((_, i) => (
+                          <MenuItem key={i + 1} value={i + 1}>
+                            {i + 1}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <FormControl sx={{ minWidth: 80, flex: 1 }}>
+                      <InputLabel>Minute</InputLabel>
+                      <Select
+                        value={eventFormData.reminder_time_minute}
+                        onChange={(e) => handleEventFormChange('reminder_time_minute', e.target.value)}
+                        label="Minute"
+                      >
+                        {[...Array(60)].map((_, i) => (
+                          <MenuItem key={i} value={i}>
+                            {String(i).padStart(2, '0')}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <FormControl sx={{ minWidth: 80 }}>
+                      <InputLabel>Period</InputLabel>
+                      <Select
+                        value={eventFormData.reminder_time_ampm}
+                        onChange={(e) => handleEventFormChange('reminder_time_ampm', e.target.value)}
+                        label="Period"
+                      >
+                        <MenuItem value="AM">AM</MenuItem>
+                        <MenuItem value="PM">PM</MenuItem>
+                      </Select>
+                    </FormControl>
+                    
+                    <Tooltip 
+                      title="Timezone for reminders can be updated in settings."
+                      arrow
+                      placement="top"
+                      open={isMobile ? openTooltipId === 'timeSelection' : undefined}
+                      onClose={handleTimeSelectionTooltipClose}
+                      disableHoverListener={isMobile}
+                      disableFocusListener={isMobile}
+                      disableTouchListener={isMobile}
+                    >
+                      <IconButton 
+                        size="small" 
+                        sx={{ color: 'text.secondary' }}
+                        onClick={handleTimeSelectionTooltipClick}
+                      >
+                        <InfoIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+
+                  {/* Reminder For Selector */}
+                  <FormControl fullWidth margin="normal" sx={{ mt: 2 }}>
+                    <InputLabel>Reminder For</InputLabel>
+                    <Select
+                      value={eventFormData.reminder_for}
+                      onChange={(e) => handleEventFormChange('reminder_for', e.target.value)}
+                      label="Reminder For"
+                    >
+                      <MenuItem value="Zoroastrian">Zoroastrian</MenuItem>
+                      <MenuItem value="Gregorian">Gregorian</MenuItem>
+                      <MenuItem value="Both">Both</MenuItem>
+                    </Select>
+                  </FormControl>
+                </>
+              )}
             </Box>
 
-            {/* Show additional reminder settings if reminder is enabled */}
-            {eventFormData.reminder_days !== -1 && (
-              <>
-                {/* Reminder Time Selector */}
-                <div style={{ display: 'flex', gap: '16px', marginTop: '16px', alignItems: 'center' }}>
-                  <FormControl sx={{ minWidth: 80, flex: 1 }}>
-                    <InputLabel>Hour</InputLabel>
-                    <Select
-                      value={eventFormData.reminder_time_hour}
-                      onChange={(e) => handleEventFormChange('reminder_time_hour', e.target.value)}
-                      label="Hour"
-                    >
-                      {[...Array(12)].map((_, i) => (
-                        <MenuItem key={i + 1} value={i + 1}>
-                          {i + 1}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  
-                  <FormControl sx={{ minWidth: 80, flex: 1 }}>
-                    <InputLabel>Minute</InputLabel>
-                    <Select
-                      value={eventFormData.reminder_time_minute}
-                      onChange={(e) => handleEventFormChange('reminder_time_minute', e.target.value)}
-                      label="Minute"
-                    >
-                      {[...Array(60)].map((_, i) => (
-                        <MenuItem key={i} value={i}>
-                          {String(i).padStart(2, '0')}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  
-                  <FormControl sx={{ minWidth: 80 }}>
-                    <InputLabel>Period</InputLabel>
-                    <Select
-                      value={eventFormData.reminder_time_ampm}
-                      onChange={(e) => handleEventFormChange('reminder_time_ampm', e.target.value)}
-                      label="Period"
-                    >
-                      <MenuItem value="AM">AM</MenuItem>
-                      <MenuItem value="PM">PM</MenuItem>
-                    </Select>
-                  </FormControl>
-                  
-                  <Tooltip 
-                    title="Timezone for reminders can be updated in settings."
-                    arrow
-                    placement="top"
-                    open={isMobile ? openTooltipId === 'timeSelection' : undefined}
-                    onClose={handleTimeSelectionTooltipClose}
-                    disableHoverListener={isMobile}
-                    disableFocusListener={isMobile}
-                    disableTouchListener={isMobile}
-                  >
-                    <IconButton 
-                      size="small" 
-                      sx={{ color: 'text.secondary' }}
-                      onClick={handleTimeSelectionTooltipClick}
-                    >
-                      <InfoIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </div>
-
-                {/* Reminder For Selector */}
+            {/* Instant Calendar Invite Section */}
+            <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={eventFormData.send_instant_invite}
+                    onChange={(e) => handleEventFormChange('send_instant_invite', e.target.checked)}
+                  />
+                }
+                label="Send calendar invite via email"
+              />
+              
+              {/* Show calendar type selection when instant invite is enabled */}
+              {eventFormData.send_instant_invite && (
                 <FormControl fullWidth margin="normal" sx={{ mt: 2 }}>
-                  <InputLabel>Reminder For</InputLabel>
+                  <InputLabel>Calendar Type</InputLabel>
                   <Select
-                    value={eventFormData.reminder_for}
-                    onChange={(e) => handleEventFormChange('reminder_for', e.target.value)}
-                    label="Reminder For"
+                    value={eventFormData.instant_invite_for}
+                    onChange={(e) => handleEventFormChange('instant_invite_for', e.target.value)}
+                    label="Calendar Type"
                   >
                     <MenuItem value="Zoroastrian">Zoroastrian</MenuItem>
                     <MenuItem value="Gregorian">Gregorian</MenuItem>
                     <MenuItem value="Both">Both</MenuItem>
                   </Select>
                 </FormControl>
-              </>
-            )}
+              )}
+            </Box>
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 3, pt: 0 }}>
             <Button 
